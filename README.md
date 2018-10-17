@@ -1,3 +1,6 @@
+[![CircleCI](https://circleci.com/gh/dotdoom/comicslate.svg?style=shield)](https://circleci.com/gh/dotdoom/comicslate)
+
+
 ## Host system configuration
 
 * for `vmtouch`
