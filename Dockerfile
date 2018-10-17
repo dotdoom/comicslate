@@ -34,7 +34,7 @@ COPY src/logrotate "/etc/logrotate.d/${HOSTNAME}"
 
 # nullmailer asks questions, ignore them because we configure it later.
 RUN DEBIAN_FRONTEND=noninteractive apt install nullmailer
-RUN echo "${HOSTNAME}" > /etc/hostname && echo "${HOSTNAME}" > /etc/mailname
+RUN echo "${HOSTNAME}" > /etc/mailname
 RUN rm -rf /etc/nullmailer && \
 	ln -sf /var/www/.htsecure/nullmailer /etc/nullmailer
 
