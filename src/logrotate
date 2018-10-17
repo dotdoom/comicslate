@@ -1,0 +1,14 @@
+/var/www/.htsecure/log/*.log {
+	daily
+	minsize 100k
+	missingok
+	rotate 9
+	compress
+	delaycompress
+	notifempty
+	create 0600 www-data www-data
+	sharedscripts
+	postrotate
+		service apache2 reload
+	endscript
+}

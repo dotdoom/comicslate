@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
+
+if [ "$(date +%w)" -eq 1 ]; then
+	if update-certificates.sh; then
+		service apache2 reload
+		service vsftpd restart
+	fi
+fi
+
+BACKUP_ROOT=/var/www/.htsecure/archives
+mkdir -p "${BACKUP_ROOT?}"
+
+BACKUP_PREFIX="$(date '+%Y-%m-%d_%H-%M-%S')"
+
+7zr a "${BACKUP_ROOT?}/pages_${BACKUP_PREFIX?}.7z" \
+	/var/www/comicslate.org/data/pages >/dev/null
+7zr a "${BACKUP_ROOT?}/meta_${BACKUP_PREFIX?}.7z" \
+	/var/www/comicslate.org/data/meta >/dev/null
+
+killall vmtouch
+vmtouch -d -l -t /var/www/comicslate.org/{conf,lib,data/{index,pages,meta}}
+
+#su www-data -c 'cd comicsbot && xvfb-run -s "-screen 0, 1024x768x16" ./render.py'
