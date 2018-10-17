@@ -17,6 +17,7 @@ if [ ! -d /etc/letsencrypt/live ]; then
 fi
 
 service cron start
+service nullmailer start
 
 # TODO(dotdoom): vsftpd starts, but this command fails. Find out why.
 service vsftpd start || true
