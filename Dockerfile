@@ -46,6 +46,10 @@ COPY src/php.ini "${PHP_INI_DIR}/conf.d/30-${HOSTNAME}.ini"
 # In addition to port 80 (http) from the base image, export 443 (https).
 EXPOSE 443
 
+# PHP extensions.
+RUN apt install libpng-dev
+RUN docker-php-ext-install gd
+
 #COPY src/fonts.conf "${HOME}/.config/fontconfig/"
 #        xvfb fonts-croscore    `# for renderer script` \
 
