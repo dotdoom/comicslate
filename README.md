@@ -23,3 +23,13 @@ $ docker run --detach --net=host --restart=unless-stopped \
 $ docker exec -it comicslate bash
 $ passwd
 ```
+
+## TODO
+
+* backup
+
+* persist password across upgrades
+
+* use container network without userland-proxy, if it helps to avoid downtime
+
+* enable [live-restore](https://docs.docker.com/config/containers/live-restore/)
