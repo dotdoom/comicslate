@@ -19,7 +19,7 @@ $ docker run --detach --net=host --restart=unless-stopped \
 	--ulimit memlock=1024000000:1024000000 \
 	--hostname=comicslate.org --name=comicslate \
 	--mount type=bind,source=/var/www,target=/var/www \
-	comicslate:latest
+	dotdoom/comicslate:latest
 $ docker exec -it comicslate bash
 $ passwd
 ```
@@ -33,3 +33,5 @@ $ passwd
 * use container network without userland-proxy, if it helps to avoid downtime
 
 * enable [live-restore](https://docs.docker.com/config/containers/live-restore/)
+
+* lameduck for restart

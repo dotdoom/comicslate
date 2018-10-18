@@ -6,7 +6,7 @@
 	compress
 	delaycompress
 	notifempty
-	create 0600 www-data www-data
+	nocreate
 	sharedscripts
 	postrotate
 		service apache2 reload
