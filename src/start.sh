@@ -11,7 +11,7 @@ host pool.sysmon.hetzner.com | awk '{print "  Require ip", $NF}' | \
 service cron start
 service nullmailer start
 
-# TODO(dotdoom): vsftpd starts, but this command fails. Find out why.
+# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=911396
 service vsftpd start || true
 
 exec apache2-foreground
