@@ -69,11 +69,14 @@ $ docker stop comicslate_old && docker run --detach --restart=unless-stopped \
 	--mount type=bind,source=/var/www,target=/var/www \
 	dotdoom/comicslate:latest
 $ docker exec comicslate usermod -p "${password?}" root
+
+# Verify that the new website works.
+
 $ docker rm comicslate_old
 $ docker image prune
 ```
 
-If `docker run` fails
+If `docker run` fails or the new website doesn't work
 
 ```shell
 $ docker stop comicslate
