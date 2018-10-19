@@ -33,5 +33,3 @@ $ passwd
 * use container network without userland-proxy, if it helps to avoid downtime
 
 * enable [live-restore](https://docs.docker.com/config/containers/live-restore/)
-
-* lameduck for restart

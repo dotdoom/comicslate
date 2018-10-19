@@ -59,4 +59,4 @@ RUN apt install libpng-dev libfreetype6-dev libjpeg62-turbo-dev && \
 # To get a list of Hetzner IP addresses.
 RUN apt install bind9-host
 COPY src/start.sh /usr/local/bin/start.sh
-CMD start.sh
+CMD ["start.sh"]
