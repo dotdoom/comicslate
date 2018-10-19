@@ -51,6 +51,18 @@ RUN a2enmod ssl rewrite headers macro ext_filter
 RUN mv "${PHP_INI_DIR}/php.ini-production" "${PHP_INI_DIR}/php.ini"
 COPY src/apache2.conf "/etc/apache2/sites-enabled/${HOSTNAME}.conf"
 COPY src/php.ini "${PHP_INI_DIR}/conf.d/30-${HOSTNAME}.ini"
+# Download IP ranges allowed to have access to Apache2 web server.
+RUN curl -sSL https://www.cloudflare.com/ips-v{4,6} | \
+	sed 's/^/  Require ip /' \
+	> /etc/apache2/conf-available/cloudflare_ip.part
+RUN apt install bind9-host
+RUN host pool.sysmon.hetzner.com | awk '{print "  Require ip", $NF}' | \
+	sort > /etc/apache2/conf-available/hetzner_ip.part
+RUN apt purge bind9-host && apt autoremove --purge
+# /var/www will be mounted externally, create directory for config test only.
+RUN mkdir -p /var/www/.htsecure/log
+# Confirm that the config file we got is valid.
+RUN apachectl -D NoSSL -t
 # In addition to port 80 (http) from the base image, export 443 (https).
 EXPOSE 443
 
@@ -61,10 +73,5 @@ RUN apt install libpng-dev libfreetype6-dev libjpeg62-turbo-dev && \
 		--with-jpeg-dir=/usr/include/ && \
 	docker-php-ext-install -j$(nproc) gd
 
-#COPY src/fonts.conf "${HOME}/.config/fontconfig/"
-#        xvfb fonts-croscore    `# for renderer script` \
-
-# To get a list of Hetzner IP addresses.
-RUN apt install bind9-host
 COPY src/start.sh /usr/local/bin/start.sh
 CMD ["start.sh"]
