@@ -21,20 +21,21 @@
     which means that Docker will use iptables rules instead of spawning a
     proxy process to forward each port from host to container. Note that due to
     a [missing optimization](https://github.com/moby/moby/issues/11185), each
-    exposed port will get a separate set of `iptables` rules. For this to work,
-    you have to remove `--net=host` from the `docker run` command line below,
-    and keep `--publish` port lists up to date.
+    exposed port will get a separate set of iptables rules.
 
-    If you keep `--net=host`, it would mean that container can use any host
-    ports (which is less secure). On the other hand, using `--net=host` means
-    that ports allocation is accounted for by the kernel, and kernel will fail
-    system call for another process to listen on a used port, as opposed to
-    `iptables` which will silently intercept the traffic and always route it
-    into the container.
+    For iptables rules to be added, you have to remove `--net=host` from the
+    `docker run` command line below, and keep `--publish` port lists up to date.
 
-  Update `/etc/docker/daemon.json`:
+    If you decide to keep `--net=host`, it would mean that container can use any
+    host ports (which is less secure). On the other hand, using `--net=host`
+    means that ports allocation is accounted for by the kernel. If any other
+    container or application will try to reuse one of the ports, kernel system
+    call will complain in an obvious way. In case of iptables rules, the traffic
+    will be silently intercepted by the container.
 
-  ```
+  Update `/etc/docker/daemon.json`
+
+  ```json
   {
     "live-restore": true,
     "userland-proxy": false
@@ -45,10 +46,11 @@
 
 ## Update
 
-```
+```shell
 $ docker pull dotdoom/comicslate:latest
 $ password="$(docker exec comicslate getent shadow root | cut -d: -f2)"
-$ docker stop comicslate && docker rm comicslate
+$ docker rename comicslate{,_old}
+$ docker stop comicslate_old
 $ docker run --detach --net=host --restart=unless-stopped \
 	--publish 80:80 --publish 443:443 --publish 21:21 \
 	--publish 10100-10200:10100-10200 \
@@ -57,11 +59,26 @@ $ docker run --detach --net=host --restart=unless-stopped \
 	--mount type=bind,source=/var/www,target=/var/www \
 	dotdoom/comicslate:latest
 $ docker exec comicslate usermod -p "${password?}" root
+$ docker rm comicslate_old
+$ docker image prune
 ```
+
+If `docker run` fails
+
+```shell
+$ docker stop comicslate
+$ docker rename comicslate{,_failed}
+$ docker rename comicslate{_old,}
+$ docker run ... # see arguments above
+```
+
+The previous container will be launched and `comicslate_failed` container will
+stay around to inspect. Once done, it can be removed with
+`docker rm comicslate_failed`.
 
 ## Useful commands
 
-```
+```shell
 $ docker logs comicslate
 $ docker exec -it comicslate bash
 ```
