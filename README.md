@@ -44,6 +44,16 @@
 
   To apply the settings, restart Docker daemon with `systemctl restart docker`.
 
+## First run
+
+* use `docker run` command line from below, but with `-it bash`
+
+* disable HTTPS backend check in CloudFlare
+
+* start Apache with `apachectl -D NoSSL`
+
+* use `update-certificates.sh` script to obtain certificates
+
 ## Update
 
 ```shell
