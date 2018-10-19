@@ -28,7 +28,7 @@ RUN rm -rf /etc/letsencrypt && \
 RUN apt install cron logrotate p7zip git build-essential
 RUN git clone --depth=1 https://github.com/hoytech/vmtouch.git && \
 	cd vmtouch && make && make install && \
-	rm -rf vmtouch
+	cd .. && rm -rf vmtouch
 COPY src/cron.daily "/etc/cron.daily/${HOSTNAME}"
 COPY src/logrotate "/etc/logrotate.d/${HOSTNAME}"
 
