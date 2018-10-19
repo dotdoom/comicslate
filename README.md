@@ -10,25 +10,29 @@
   # sysctl -p /etc/sysctl.d/comicslate.conf
   ```
 
-## Operating
+## Update
 
 ```
-$ docker logs comicslate
+$ password="$(docker exec comicslate getent shadow root | cut -d: -f2)"
 $ docker stop comicslate && docker rm comicslate
 $ docker run --detach --net=host --restart=unless-stopped \
 	--ulimit memlock=1024000000:1024000000 \
 	--hostname=comicslate.org --name=comicslate \
 	--mount type=bind,source=/var/www,target=/var/www \
 	dotdoom/comicslate:latest
+$ docker exec comicslate usermod -p "${password?}" root
+```
+
+## Useful commands
+
+```
+$ docker logs comicslate
 $ docker exec -it comicslate bash
-$ passwd
 ```
 
 ## TODO
 
 * backup
-
-* persist password across upgrades
 
 * use container network without userland-proxy, if it helps to avoid downtime
 
