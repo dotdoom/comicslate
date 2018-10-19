@@ -18,6 +18,14 @@ RUN echo pasv_min_port=10100\\npasv_max_port=10200 >> /etc/vsftpd.conf
 EXPOSE 21
 EXPOSE 10100-10200
 
+# Install gsutil.
+RUN apt install gnupg2 software-properties-common
+RUN echo "deb http://packages.cloud.google.com/apt \
+	cloud-sdk-$(lsb_release -c -s) main" \
+	> /etc/apt/sources.list.d/google-cloud-sdk.list
+RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+RUN apt update && apt install google-cloud-sdk
+
 # Automatically fetch certificates for our hostnames.
 RUN apt install python-certbot-apache
 COPY src/update-certificates.sh /usr/local/bin/update-certificates.sh

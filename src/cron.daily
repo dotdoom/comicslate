@@ -2,24 +2,45 @@
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 
-if [ "$(date +%w)" -eq 1 ]; then
-	if update-certificates.sh; then
-		service apache2 reload
-		service vsftpd restart
+update_certificates() {
+	if [ "$(date +%w)" -eq 1 ]; then
+		if update-certificates.sh; then
+			service apache2 reload
+			service vsftpd restart
+		fi
 	fi
-fi
+}
 
-BACKUP_ROOT=/var/www/.htsecure/archives
-mkdir -p "${BACKUP_ROOT?}"
+create_archives() {
+	local archives_root=/var/www/.htsecure/archives
+	mkdir -p "${archives_root?}"
+	local archives_prefix="$(date '+%Y-%m-%d_%H-%M-%S')"
 
-BACKUP_PREFIX="$(date '+%Y-%m-%d_%H-%M-%S')"
+	7zr a "${archives_root?}/pages_${archives_prefix?}.7z" \
+		/var/www/comicslate.org/data/pages >/dev/null
+	7zr a "${archives_root?}/meta_${archives_prefix?}.7z" \
+		/var/www/comicslate.org/data/meta >/dev/null
+}
 
-7zr a "${BACKUP_ROOT?}/pages_${BACKUP_PREFIX?}.7z" \
-	/var/www/comicslate.org/data/pages >/dev/null
-7zr a "${BACKUP_ROOT?}/meta_${BACKUP_PREFIX?}.7z" \
-	/var/www/comicslate.org/data/meta >/dev/null
+upload_backup() {
+	gcloud auth activate-service-account \
+		--key-file=/var/www/.htsecure/backup-service-account.json
+	local backup_round="$(($(date +%_j) % 10))"
+	tar -cp --exclude-tag-all=purgefile --exclude=u \
+		/var/www/comicslate.org | \
+		gsutil cp - \
+		"gs://comicslate-org-backup/backup-${backup_round?}.tar"
+}
 
-killall vmtouch
-vmtouch -d -l -t /var/www/comicslate.org/{conf,lib,data/{index,pages,meta}}
+lock_frequently_accessed_data() {
+	kill "$(pgrep vmtouch)"
+	vmtouch -d -l -t \
+		/var/www/comicslate.org/{conf,lib,data/{index,pages,meta}}
+}
+
+update_certificates
+create_archives
+upload_backup
+lock_frequently_accessed_data
 
 #su www-data -c 'cd comicsbot && xvfb-run -s "-screen 0, 1024x768x16" ./render.py'

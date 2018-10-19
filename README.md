@@ -65,7 +65,3 @@ $ docker exec comicslate usermod -p "${password?}" root
 $ docker logs comicslate
 $ docker exec -it comicslate bash
 ```
-
-## TODO
-
-* backup
