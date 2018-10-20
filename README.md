@@ -48,7 +48,8 @@
 
 * use `docker run` command line from below, but with `-it bash`
 
-* disable HTTPS backend check in CloudFlare
+* disable HTTPS backend check in CloudFlare (on the Crypto page,
+  set SSL to Flexible)
 
 * start Apache with `apachectl -D NoSSL`
 
@@ -95,3 +96,9 @@ stay around to inspect. Once done, it can be removed with
 $ docker logs comicslate
 $ docker exec -it comicslate bash
 ```
+
+## TODO
+
+* consider usefulness of `uodate-certificates.sh` vs `certbot -q renew` which is
+  already in cron.d, and only needs Apache and vsftpd reload hooks put into
+  `/etc/letsencrypt`. Initial certificate fetch instructions can be put here.
