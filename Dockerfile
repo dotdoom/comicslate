@@ -9,6 +9,9 @@ RUN echo \
 RUN apt update
 RUN apt dist-upgrade
 
+# Install syslog for tools like cron and vsftpd.
+RUN apt install syslog-ng
+
 # Configure FTP server for admin access.
 RUN apt install vsftpd
 COPY src/vsftpd.conf /etc/vsftpd.conf
