@@ -103,6 +103,4 @@ $ docker exec -it comicslate bash
   already in cron.d, and only needs Apache and vsftpd reload hooks put into
   `/etc/letsencrypt`. Initial certificate fetch instructions can be put here.
 
-* add `HEALTHCHECK` for the website
-
 * fix cron backups, and make sure it emails on failures

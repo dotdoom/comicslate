@@ -76,5 +76,10 @@ RUN apt install libpng-dev libfreetype6-dev libjpeg62-turbo-dev && \
 		--with-jpeg-dir=/usr/include/ && \
 	docker-php-ext-install -j$(nproc) gd
 
+# Do "grep -c" so that grep reads the whole input and curl is happy.
+# In addition, normalize the exit code (return strictly 0 or 1).
+HEALTHCHECK CMD curl -sSL --connect-to localhost \
+	"https://${HOSTNAME}/" | grep -c freefall || false
+
 COPY src/start.sh /usr/local/bin/start.sh
 CMD ["start.sh"]
