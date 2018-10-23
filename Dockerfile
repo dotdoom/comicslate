@@ -11,6 +11,7 @@ RUN apt dist-upgrade
 
 # Install syslog for tools like cron and vsftpd.
 RUN apt install syslog-ng
+COPY src/syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
 
 # Configure FTP server for admin access.
 RUN apt install vsftpd
