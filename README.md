@@ -99,8 +99,8 @@ $ docker exec -it comicslate bash
 
 ## TODO
 
-* consider usefulness of `uodate-certificates.sh` vs `certbot -q renew` which is
+* consider usefulness of `update-certificates.sh` vs `certbot -q renew` which is
   already in cron.d, and only needs Apache and vsftpd reload hooks put into
   `/etc/letsencrypt`. Initial certificate fetch instructions can be put here.
 
-* fix cron backups, and make sure it emails on failures
+* consider using `VOLUME` for certificates and password

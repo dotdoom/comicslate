@@ -41,7 +41,8 @@ RUN apt install cron logrotate p7zip git build-essential
 RUN git clone --depth=1 https://github.com/hoytech/vmtouch.git && \
 	cd vmtouch && make && make install && \
 	cd .. && rm -rf vmtouch
-COPY src/cron.daily "/etc/cron.daily/${HOSTNAME}"
+# cron uses run-parts(8), which by default ignores files with dot in the name.
+COPY src/cron.daily "/etc/cron.daily/comicslate"
 COPY src/logrotate "/etc/logrotate.d/${HOSTNAME}"
 
 # nullmailer asks questions, ignore them because we configure it later.
