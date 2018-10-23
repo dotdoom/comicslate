@@ -47,8 +47,11 @@ COPY src/logrotate "/etc/logrotate.d/${HOSTNAME}"
 # nullmailer asks questions, ignore them because we configure it later.
 RUN DEBIAN_FRONTEND=noninteractive apt install nullmailer
 RUN echo "${HOSTNAME}" > /etc/mailname
-RUN rm -rf /etc/nullmailer && \
-	ln -sf /var/www/.htsecure/nullmailer /etc/nullmailer
+# In nullmailer Debian 1:1.13-1.2, 'mailname' is referenced as '../mailname'
+# relative to /etc/nullmailer. Symplinking /etc/nullmailer to e.g.
+# /var/www/.htsecure/nullmailer makes 'mailname' resolve to
+# /var/www/.htsecure/mailname, which is wrong. So we copy over in start.sh.
+# See https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=504184 (patch 12).
 
 # Configure Apache web server.
 RUN a2enmod ssl rewrite headers macro ext_filter
