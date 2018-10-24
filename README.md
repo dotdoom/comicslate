@@ -49,16 +49,12 @@
 * disable HTTPS backend check in CloudFlare for the websites that do not have a
   valid certificate (on the Crypto page, set SSL to Flexible)
 
-* use `docker run` command line from below, but instead type `docker run -it`
-  and add `bash` at the end of the command. This will start a container and a
-  shell session inside it
+* use `docker run` command line from below, but instead type `docker run -it`.
+  This will start a container in debug mode and a shell session inside it
 
 * run the following commands
 
   ```shell
-  # Start Apache web server without SSL
-  $ apachectl -D NoSSL
-
   # Set your email
   $ EMAIL=example@gmail.com
 

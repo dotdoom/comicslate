@@ -63,6 +63,12 @@ start() {
 	service vsftpd start || true
 	service vmtouch start
 
+	# When we're in a TTY, assume that this is a debug session.
+	if [ -t 1 ]; then
+		apachectl start || apachectl -D NoSSL
+		exec bash
+	fi
+
 	exec apache2-foreground
 }
 
