@@ -81,5 +81,4 @@ RUN mkdir -p /var/www/.htsecure/log && \
 	/usr/local/bin/serverctl update_whitelisted_ips && \
 	apachectl -D NoSSL -t
 
-
 CMD ["serverctl", "start"]
