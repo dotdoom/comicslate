@@ -44,16 +44,36 @@
 
   To apply the settings, restart Docker daemon with `systemctl restart docker`.
 
-## First run
+## Getting (new) certificates
 
-* use `docker run` command line from below, but with `-it bash`
+* disable HTTPS backend check in CloudFlare for the websites that do not have a
+  valid certificate (on the Crypto page, set SSL to Flexible)
 
-* disable HTTPS backend check in CloudFlare (on the Crypto page,
-  set SSL to Flexible)
+* use `docker run` command line from below, but instead `docker run -it` and add
+  `bash` at the end of the command. This will start a container and a shell
+  session inside it
 
-* start Apache with `apachectl -D NoSSL`
+* run the following commands
 
-* use `update-certificates.sh` script to obtain certificates
+  ```shell
+  # Start Apache web server without SSL
+  $ apachectl -D NoSSL
+
+  # Set your email
+  $ EMAIL=example@gmail.com
+
+  # Walk through /var/www to get certificate for every domain (assuming that all
+  # files with '.' in the name are domain names).
+  $ for vhost_path in /var/www/*.*; do
+  	domain="$(basename "${vhost_path?}")"
+  	certbot certonly \
+  		--agree-tos \
+  		--email "${EMAIL?}" \
+  		--domain "${domain?}" \
+  		--webroot \
+  		--webroot-path "${vhost_path?}"
+  done
+  ```
 
 ## Update
 
@@ -98,9 +118,5 @@ $ docker exec -it comicslate bash
 ```
 
 ## TODO
-
-* consider usefulness of `update-certificates.sh` vs `certbot -q renew` which is
-  already in cron.d, and only needs Apache and vsftpd reload hooks put into
-  `/etc/letsencrypt`. Initial certificate fetch instructions can be put here.
 
 * consider using `VOLUME` for certificates and password

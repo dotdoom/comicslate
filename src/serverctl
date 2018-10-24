@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+
+set -e
+
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
+
+reload_certificates() {
+	service apache2 reload
+	service vsftpd restart
+}
+
+update_whitelisted_ips() {
+	curl -sSL https://www.cloudflare.com/ips-v{4,6} | \
+		sed 's/^/  Require ip /' \
+		> /etc/apache2/conf-available/cloudflare_ip.part
+	getent ahosts pool.sysmon.hetzner.com | \
+		awk '!seen[$1]++ { print "  Require ip", $1 }' | \
+		sort > /etc/apache2/conf-available/hetzner_ip.part
+}
+
+create_archives() {
+	local archives_root=/var/www/.htsecure/archives
+	mkdir -p "${archives_root?}"
+	local archives_prefix="$(date '+%Y-%m-%d_%H-%M-%S')"
+
+	7zr a "${archives_root?}/pages_${archives_prefix?}.7z" \
+		/var/www/comicslate.org/data/pages >/dev/null
+	7zr a "${archives_root?}/meta_${archives_prefix?}.7z" \
+		/var/www/comicslate.org/data/meta >/dev/null
+}
+
+upload_backup() {
+	gcloud auth activate-service-account \
+		--key-file=/var/www/.htsecure/backup-service-account.json
+	local backup_round="$(($(date +%_j) % 10))"
+	tar -cp --exclude-tag-all=purgefile --exclude=u \
+		/var/www/comicslate.org | \
+		gsutil cp - \
+		"gs://comicslate-org-backup/backup-${backup_round?}.tar"
+}
+
+cron() {
+	create_archives || failure=1
+	upload_backup || failure=1
+	service vmtouch restart || failure=1
+	test -z "$failure"
+}
+
+start() {
+	# See Dockerfile for rationale why it's not a symlink.
+	rm -rf /etc/nullmailer
+	cp -r /var/www/.htsecure/nullmailer /etc &&
+		chown -R mail:mail /etc/nullmailer &&
+		chmod -R u=rX,g=rX,o= /etc/nullmailer
+
+	service cron start
+	service nullmailer start
+	service syslog-ng start
+	# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=911396
+	service vsftpd start || true
+	service vmtouch start
+
+	exec apache2-foreground
+}
+
+if [ "$(basename "${0}")" = "reload_certificates" ]; then
+	reload_certificates
+else
+	"${1?command argument required}"
+fi

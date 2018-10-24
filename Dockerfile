@@ -32,7 +32,6 @@ RUN apt update && apt install google-cloud-sdk
 
 # Automatically fetch certificates for our hostnames.
 RUN apt install python-certbot-apache
-COPY src/update-certificates.sh /usr/local/bin/update-certificates.sh
 RUN rm -rf /etc/letsencrypt && \
 	ln -sf /var/www/.htsecure/certificates /etc/letsencrypt
 
@@ -42,8 +41,7 @@ RUN git clone --depth=1 https://github.com/hoytech/vmtouch.git && \
 	cd vmtouch && make && make install && \
 	cd .. && rm -rf vmtouch
 COPY src/vmtouch.service /etc/init.d/vmtouch
-# cron uses run-parts(8), which by default ignores files with dot in the name.
-COPY src/cron.daily "/etc/cron.daily/comicslate"
+RUN echo '0 3 * * * root /usr/local/bin/serverctl cron' >> /etc/crontab
 COPY src/logrotate "/etc/logrotate.d/${HOSTNAME}"
 
 # nullmailer asks questions, ignore them because we configure it later.
@@ -64,10 +62,9 @@ COPY src/php.ini "${PHP_INI_DIR}/conf.d/30-${HOSTNAME}.ini"
 RUN curl -sSL https://www.cloudflare.com/ips-v{4,6} | \
 	sed 's/^/  Require ip /' \
 	> /etc/apache2/conf-available/cloudflare_ip.part
-RUN apt install bind9-host
-RUN host pool.sysmon.hetzner.com | awk '{print "  Require ip", $NF}' | \
+RUN getent ahosts pool.sysmon.hetzner.com | \
+	awk '!seen[$1]++ { print "  Require ip", $1 }' | \
 	sort > /etc/apache2/conf-available/hetzner_ip.part
-RUN apt purge bind9-host && apt autoremove --purge
 # /var/www will be mounted externally, create directory for config test only.
 RUN mkdir -p /var/www/.htsecure/log
 # Confirm that the config file we got is valid.
@@ -87,5 +84,5 @@ RUN apt install libpng-dev libfreetype6-dev libjpeg62-turbo-dev && \
 HEALTHCHECK CMD curl -sSL --connect-to localhost \
 	"https://${HOSTNAME}/" | grep -c freefall || false
 
-COPY src/start.sh /usr/local/bin/start.sh
-CMD ["start.sh"]
+COPY src/serverctl /usr/local/bin/serverctl
+CMD ["serverctl", "start"]
