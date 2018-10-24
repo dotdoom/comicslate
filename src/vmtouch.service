@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -e
+
+start() {
+	vmtouch -d -l -t \
+		/var/www/comicslate.org/{conf,lib,data/{index,pages,meta}}
+}
+
+stop() {
+	kill $(pgrep vmtouch) || true
+}
+
+restart() {
+	stop
+	start
+}
+
+"$1"

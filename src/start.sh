@@ -13,5 +13,6 @@ service nullmailer start
 service syslog-ng start
 # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=911396
 service vsftpd start || true
+service vmtouch start
 
 exec apache2-foreground

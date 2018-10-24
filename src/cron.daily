@@ -32,15 +32,9 @@ upload_backup() {
 		"gs://comicslate-org-backup/backup-${backup_round?}.tar"
 }
 
-lock_frequently_accessed_data() {
-	kill "$(pgrep vmtouch)"
-	vmtouch -d -l -t \
-		/var/www/comicslate.org/{conf,lib,data/{index,pages,meta}}
-}
-
 update_certificates
 create_archives
 upload_backup
-lock_frequently_accessed_data
+service vmtouch restart
 
 #su www-data -c 'cd comicsbot && xvfb-run -s "-screen 0, 1024x768x16" ./render.py'
