@@ -65,13 +65,13 @@
   # Walk through /var/www to get certificate for every domain (assuming that all
   # files with '.' in the name are domain names).
   $ for vhost_path in /var/www/*.*; do
-  	domain="$(basename "${vhost_path?}")"
-  	certbot certonly \
-  		--agree-tos \
-  		--email "${EMAIL?}" \
-  		--domain "${domain?}" \
-  		--webroot \
-  		--webroot-path "${vhost_path?}"
+    domain="$(basename "${vhost_path?}")"
+    certbot certonly \
+      --agree-tos \
+      --email "${EMAIL?}" \
+      --domain "${domain?}" \
+      --webroot \
+      --webroot-path "${vhost_path?}"
   done
   ```
 
@@ -79,18 +79,18 @@
 
 ```shell
 $ docker pull dotdoom/comicslate:latest &&
-	password="$(docker exec comicslate getent shadow root | cut -d: -f2)" &&
-	docker rename comicslate{,_old} &&
-	docker stop comicslate_old &&
-	docker run --detach --restart=unless-stopped \
-		--net=host \
-		--publish 80:80 --publish 443:443 --publish 21:21 \
-		--publish 10100-10200:10100-10200 \
-		--ulimit memlock=1024000000:1024000000 \
-		--hostname=comicslate.org --name=comicslate \
-		--mount type=bind,source=/var/www,target=/var/www \
-		dotdoom/comicslate:latest &&
-	docker exec comicslate usermod -p "${password?}" root
+    password="$(docker exec comicslate getent shadow root | cut -d: -f2)" &&
+    docker rename comicslate{,_old} &&
+    docker stop comicslate_old &&
+    docker run --detach --restart=unless-stopped \
+      --net=host \
+      --publish 80:80 --publish 443:443 --publish 21:21 \
+      --publish 10100-10200:10100-10200 \
+      --ulimit memlock=1024000000:1024000000 \
+      --hostname=comicslate.org --name=comicslate \
+      --mount type=bind,source=/var/www,target=/var/www \
+      dotdoom/comicslate:latest &&
+    docker exec comicslate usermod -p "${password?}" root
 
 # Verify that the new website works.
 
