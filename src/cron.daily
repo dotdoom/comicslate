@@ -32,9 +32,12 @@ upload_backup() {
 		"gs://comicslate-org-backup/backup-${backup_round?}.tar"
 }
 
-update_certificates
-create_archives
-upload_backup
-service vmtouch restart
+exitcode=0
+update_certificates || exitcode=1
+create_archives || exitcode=1
+upload_backup || exitcode=1
+service vmtouch restart || exitcode=1
+
+exit "${exitcode?}"
 
 #su www-data -c 'cd comicsbot && xvfb-run -s "-screen 0, 1024x768x16" ./render.py'
