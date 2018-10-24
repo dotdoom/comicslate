@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 
 update_certificates() {
@@ -32,12 +34,10 @@ upload_backup() {
 		"gs://comicslate-org-backup/backup-${backup_round?}.tar"
 }
 
-exitcode=0
-update_certificates || exitcode=1
-create_archives || exitcode=1
-upload_backup || exitcode=1
-service vmtouch restart || exitcode=1
-
-exit "${exitcode?}"
+update_certificates || failure=1
+create_archives || failure=1
+upload_backup || failure=1
+service vmtouch restart || failure=1
+test -z "$failure"
 
 #su www-data -c 'cd comicsbot && xvfb-run -s "-screen 0, 1024x768x16" ./render.py'
