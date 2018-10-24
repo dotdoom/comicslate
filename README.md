@@ -78,18 +78,19 @@
 ## Update
 
 ```shell
-$ docker pull dotdoom/comicslate:latest
-$ password="$(docker exec comicslate getent shadow root | cut -d: -f2)"
-$ docker rename comicslate{,_old}
-$ docker stop comicslate_old && docker run --detach --restart=unless-stopped \
-	--net=host \
-	--publish 80:80 --publish 443:443 --publish 21:21 \
-	--publish 10100-10200:10100-10200 \
-	--ulimit memlock=1024000000:1024000000 \
-	--hostname=comicslate.org --name=comicslate \
-	--mount type=bind,source=/var/www,target=/var/www \
-	dotdoom/comicslate:latest
-$ docker exec comicslate usermod -p "${password?}" root
+$ docker pull dotdoom/comicslate:latest &&
+	password="$(docker exec comicslate getent shadow root | cut -d: -f2)" &&
+	docker rename comicslate{,_old} &&
+	docker stop comicslate_old &&
+	docker run --detach --restart=unless-stopped \
+		--net=host \
+		--publish 80:80 --publish 443:443 --publish 21:21 \
+		--publish 10100-10200:10100-10200 \
+		--ulimit memlock=1024000000:1024000000 \
+		--hostname=comicslate.org --name=comicslate \
+		--mount type=bind,source=/var/www,target=/var/www \
+		dotdoom/comicslate:latest &&
+	docker exec comicslate usermod -p "${password?}" root
 
 # Verify that the new website works.
 
