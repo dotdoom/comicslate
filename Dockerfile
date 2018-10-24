@@ -58,17 +58,6 @@ RUN a2enmod ssl rewrite headers macro ext_filter
 RUN mv "${PHP_INI_DIR}/php.ini-production" "${PHP_INI_DIR}/php.ini"
 COPY src/apache2.conf "/etc/apache2/sites-enabled/${HOSTNAME}.conf"
 COPY src/php.ini "${PHP_INI_DIR}/conf.d/30-${HOSTNAME}.ini"
-# Download IP ranges allowed to have access to Apache2 web server.
-RUN curl -sSL https://www.cloudflare.com/ips-v{4,6} | \
-	sed 's/^/  Require ip /' \
-	> /etc/apache2/conf-available/cloudflare_ip.part
-RUN getent ahosts pool.sysmon.hetzner.com | \
-	awk '!seen[$1]++ { print "  Require ip", $1 }' | \
-	sort > /etc/apache2/conf-available/hetzner_ip.part
-# /var/www will be mounted externally, create directory for config test only.
-RUN mkdir -p /var/www/.htsecure/log
-# Confirm that the config file we got is valid.
-RUN apachectl -D NoSSL -t
 # In addition to port 80 (http) from the base image, export 443 (https).
 EXPOSE 443
 
@@ -85,4 +74,12 @@ HEALTHCHECK CMD curl -sSL --connect-to localhost \
 	"https://${HOSTNAME}/" | grep -c freefall || false
 
 COPY src/serverctl /usr/local/bin/serverctl
+
+# Confirm that the config file we got is valid.
+# /var/www will be mounted externally, create directory for config test only.
+RUN mkdir -p /var/www/.htsecure/log && \
+	/usr/local/bin/serverctl update_whitelisted_ips && \
+	apachectl -D NoSSL -t
+
+
 CMD ["serverctl", "start"]

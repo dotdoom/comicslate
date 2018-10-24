@@ -41,6 +41,11 @@ upload_backup() {
 }
 
 cron() {
+	# Update whitelisted IP ranges but do not reload (yet). A reload may
+	# be triggered some time in the future by reload_certificates, which
+	# is called by certbot from cron.d.
+	update_whitelisted_ips
+
 	create_archives || failure=1
 	upload_backup || failure=1
 	service vmtouch restart || failure=1
@@ -48,6 +53,8 @@ cron() {
 }
 
 start() {
+	update_whitelisted_ips
+
 	# See Dockerfile for rationale why it's not a symlink.
 	rm -rf /etc/nullmailer
 	cp -r /var/www/.htsecure/nullmailer /etc &&
