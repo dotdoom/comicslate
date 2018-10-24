@@ -49,9 +49,9 @@
 * disable HTTPS backend check in CloudFlare for the websites that do not have a
   valid certificate (on the Crypto page, set SSL to Flexible)
 
-* use `docker run` command line from below, but instead `docker run -it` and add
-  `bash` at the end of the command. This will start a container and a shell
-  session inside it
+* use `docker run` command line from below, but instead type `docker run -it`
+  and add `bash` at the end of the command. This will start a container and a
+  shell session inside it
 
 * run the following commands
 
@@ -78,33 +78,33 @@
 ## Update
 
 ```shell
+$ alias docker_run_comicslate=docker run \
+    --detach --restart=unless-stopped --net=host \
+    --publish 80:80 --publish 443:443 --publish 21:21 \
+    --publish 10100-10200:10100-10200 \
+    --ulimit memlock=1024000000:1024000000 \
+    --hostname=comicslate.org --name=comicslate \
+    --mount type=bind,source=/var/www,target=/var/www \
+    dotdoom/comicslate:latest
 $ docker pull dotdoom/comicslate:latest &&
     password="$(docker exec comicslate getent shadow root | cut -d: -f2)" &&
     docker rename comicslate{,_old} &&
     docker stop comicslate_old &&
-    docker run --detach --restart=unless-stopped \
-      --net=host \
-      --publish 80:80 --publish 443:443 --publish 21:21 \
-      --publish 10100-10200:10100-10200 \
-      --ulimit memlock=1024000000:1024000000 \
-      --hostname=comicslate.org --name=comicslate \
-      --mount type=bind,source=/var/www,target=/var/www \
-      dotdoom/comicslate:latest &&
+    docker_run_comicslate &&
     docker exec comicslate usermod -p "${password?}" root
 
 # Verify that the new website works.
 
-$ docker rm comicslate_old
-$ docker image prune
+$ docker rm comicslate_old; docker image prune
 ```
 
 If `docker run` fails or the new website doesn't work
 
 ```shell
-$ docker stop comicslate
-$ docker rename comicslate{,_failed}
-$ docker rename comicslate{_old,}
-$ docker run ... # see arguments above
+$ docker stop comicslate; \
+    docker rename comicslate{,_failed} && \
+    docker rename comicslate{_old,} && \
+    docker_run_comicslate
 ```
 
 The previous container will be launched and `comicslate_failed` container will
