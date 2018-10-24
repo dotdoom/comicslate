@@ -121,3 +121,7 @@ $ docker exec -it comicslate bash
 ## TODO
 
 * consider using `VOLUME` for certificates and password
+
+* consider newer nullmailer (2+ has easier configuration) and certbot (0.19+
+  supports certificate renewal hook directories), available from
+  stretch-backports

@@ -4,12 +4,6 @@ set -e
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 
-reload_certificates() {
-	service apache2 reload
-	# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=911396
-	service vsftpd restart || true
-}
-
 update_whitelisted_ips() {
 	curl -sSL https://www.cloudflare.com/ips-v{4,6} | \
 		sed 's/^/  Require ip /' \
@@ -41,10 +35,11 @@ upload_backup() {
 }
 
 cron() {
-	# Update whitelisted IP ranges but do not reload (yet). A reload may
-	# be triggered some time in the future by reload_certificates, which
-	# is called by certbot from cron.d.
 	update_whitelisted_ips
+	# Reload Apache and FTP daemons to pick up new certificates.
+	service apache2 reload
+	# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=911396
+	service vsftpd restart || true
 
 	create_archives || failure=1
 	upload_backup || failure=1
@@ -71,8 +66,4 @@ start() {
 	exec apache2-foreground
 }
 
-if [ "$(basename "${0}")" = "reload_certificates" ]; then
-	reload_certificates
-else
-	"${1?command argument required}"
-fi
+"${1?command argument required}"
