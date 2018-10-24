@@ -6,7 +6,8 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 
 reload_certificates() {
 	service apache2 reload
-	service vsftpd restart
+	# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=911396
+	service vsftpd restart || true
 }
 
 update_whitelisted_ips() {
