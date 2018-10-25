@@ -25,21 +25,20 @@ create_archives() {
 }
 
 upload_backup() {
-	gcloud auth activate-service-account \
+	gcloud -q auth activate-service-account \
 		--key-file=/var/www/.htsecure/backup-service-account.json
 	local backup_round="$(($(date +%_j) % 10))"
-	tar -cp --exclude-tag-all=purgefile --exclude=u \
-		/var/www/comicslate.org | \
-		gsutil cp - \
+	tar -C /var/www -cp --exclude-tag-all=purgefile --exclude=u . | \
+		gsutil -q cp - \
 		"gs://comicslate-org-backup/backup-${backup_round?}.tar"
 }
 
 cron() {
-	update_whitelisted_ips
+	update_whitelisted_ips || failure=1
 	# Reload Apache and FTP daemons to pick up new certificates.
-	service apache2 reload
+	service apache2 reload > /dev/null || failure=1
 	# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=911396
-	service vsftpd restart || true
+	service vsftpd restart > /dev/null || true
 
 	create_archives || failure=1
 	upload_backup || failure=1
