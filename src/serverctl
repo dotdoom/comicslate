@@ -25,8 +25,6 @@ create_archives() {
 }
 
 upload_backup() {
-	gcloud -q auth activate-service-account \
-		--key-file=/var/www/.htsecure/backup-service-account.json
 	local backup_round="$(($(date +%_j) % 10))"
 	tar -C /var/www -cp --exclude-tag-all=purgefile --exclude=u . | \
 		gsutil -q cp - \
@@ -54,6 +52,13 @@ start() {
 	cp -r /var/www/.htsecure/nullmailer /etc &&
 		chown -R mail:mail /etc/nullmailer &&
 		chmod -R u=rX,g=rX,o= /etc/nullmailer
+
+	# GCloud Service Account to be used when uploading backups. Print an
+	# error, but ignore if it fails - this is non-critical, and cron will
+	# notify if backup can not proceed.
+	gcloud -q auth activate-service-account \
+		--key-file=/var/www/.htsecure/backup-service-account.json ||
+		true
 
 	service cron start
 	service nullmailer start
