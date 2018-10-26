@@ -87,16 +87,19 @@ $ docker pull dotdoom/comicslate:latest &&
     docker rename comicslate{,_old} &&
     docker stop comicslate_old &&
     docker_run_comicslate &&
-    docker exec comicslate usermod -p "${password?}" root
+    docker exec comicslate usermod -p "${password?}" root &&
+    docker logs -f comicslate
 
 # Verify that the new website works.
 
+^C
 $ docker rm comicslate_old; docker image prune
 ```
 
 If `docker run` fails or the new website doesn't work
 
 ```shell
+^C
 $ docker stop comicslate; \
     docker rename comicslate{,_failed} && \
     docker rename comicslate{_old,} && \
