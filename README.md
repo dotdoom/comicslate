@@ -1,5 +1,7 @@
-[![CircleCI](https://circleci.com/gh/dotdoom/comicslate.svg?style=shield)](https://circleci.com/gh/dotdoom/comicslate)
+# Docker image for comicslate.org website
 
+[![CircleCI](https://circleci.com/gh/dotdoom/comicslate.svg?style=shield)](https://circleci.com/gh/dotdoom/comicslate)
+[![MicroBadger Size](https://img.shields.io/microbadger/image-size/dotdoom/comicslate.svg)](https://hub.docker.com/r/dotdoom/comicslate/tags/)
 
 ## Host system configuration
 
