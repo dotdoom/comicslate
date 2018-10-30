@@ -35,8 +35,7 @@ cron() {
 	update_whitelisted_ips || failure=1
 	# Reload Apache and FTP daemons to pick up new certificates.
 	service apache2 reload > /dev/null || failure=1
-	# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=911396
-	service vsftpd restart > /dev/null || true
+	service vsftpd restart > /dev/null || failure=1
 
 	create_archives || failure=1
 	upload_backup || failure=1
@@ -63,8 +62,7 @@ start() {
 	service cron start
 	service nullmailer start
 	service syslog-ng start
-	# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=911396
-	service vsftpd start || true
+	service vsftpd start
 	service vmtouch start
 
 	# When we're in a TTY, assume that this is a debug session.
