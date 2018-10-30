@@ -1,6 +1,6 @@
 # Docker image for comicslate.org website
 
-[![CircleCI](https://circleci.com/gh/dotdoom/comicslate.svg?style=shield)](https://circleci.com/gh/dotdoom/comicslate)
+[![Docker Build Status](https://img.shields.io/docker/build/dotdoom/comicslate.svg)](https://hub.docker.com/r/dotdoom/comicslate/builds/)
 [![MicroBadger Size](https://img.shields.io/microbadger/image-size/dotdoom/comicslate.svg)](https://hub.docker.com/r/dotdoom/comicslate/tags/)
 
 ## Host system configuration
@@ -126,6 +126,3 @@ $ docker exec -it comicslate bash
 * consider newer nullmailer (2+ has easier configuration) and certbot (0.19+
   supports certificate renewal hook directories), available from
   stretch-backports
-
-* move repository build to
-  [Docker Hub automated builds](https://docs.docker.com/docker-hub/builds/)
