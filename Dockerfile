@@ -82,6 +82,8 @@ COPY src/serverctl /usr/local/bin/serverctl
 # /var/www will be mounted externally, create directory for config test only.
 RUN mkdir -p /var/www/.htsecure/log && \
 	/usr/local/bin/serverctl update_whitelisted_ips && \
-	apachectl -D NoSSL -t
+	apachectl -D NoSSL -t && \
+	rm -rf /var/www/.htsecure
 
+ENTRYPOINT []
 CMD ["serverctl", "start"]
