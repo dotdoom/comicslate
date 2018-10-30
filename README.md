@@ -101,8 +101,8 @@ If `docker run` fails or the new website doesn't work
 ```shell
 ^C
 $ docker stop comicslate; \
-    docker rename comicslate{,_failed} && \
-    docker rename comicslate{_old,} && \
+    docker rename comicslate{,_failed} &&
+    docker rename comicslate{_old,} &&
     docker_run_comicslate
 ```
 
@@ -124,3 +124,6 @@ $ docker exec -it comicslate bash
 * consider newer nullmailer (2+ has easier configuration) and certbot (0.19+
   supports certificate renewal hook directories), available from
   stretch-backports
+
+* move repository build to
+  [Docker Hub automated builds](https://docs.docker.com/docker-hub/builds/)
