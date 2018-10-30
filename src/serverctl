@@ -26,7 +26,12 @@ create_archives() {
 
 upload_backup() {
 	local backup_round="$(($(date +%_j) % 10))"
-	tar -C /var/www -cp --exclude-tag-all=purgefile --exclude=u . | \
+	tar -C /var/www -cp \
+		--exclude-tag-all=purgefile \
+		--exclude=u \
+		--exclude=./.htsecure/log \
+		--exclude=./.htsecure/archives \
+		. | \
 		gsutil -q cp - \
 		"gs://comicslate-org-backup/backup-${backup_round?}.tar"
 }
