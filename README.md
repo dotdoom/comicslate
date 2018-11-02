@@ -1,4 +1,4 @@
-# Docker image for comicslate.org website
+# Docker image for comicslate.org webserver
 
 [![Docker Build Status](https://img.shields.io/docker/build/dotdoom/comicslate.svg)](https://hub.docker.com/r/dotdoom/comicslate/builds/)
 [![MicroBadger Size](https://img.shields.io/microbadger/image-size/dotdoom/comicslate.svg)](https://hub.docker.com/r/dotdoom/comicslate/tags/)
@@ -109,7 +109,7 @@ $ docker stop comicslate; \
 ```
 
 The previous container will be launched and `comicslate_failed` container will
-stay around to inspect. Once done, it can be removed with
+stay around for inspection. Once it's done, that container can be removed with
 `docker rm comicslate_failed`.
 
 ## Useful commands
