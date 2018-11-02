@@ -9,6 +9,6 @@
 	nocreate
 	sharedscripts
 	postrotate
-		service apache2 reload
+		service apache2 reload > /dev/null
 	endscript
 }
