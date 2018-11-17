@@ -19,10 +19,9 @@ COPY src/vsftpd.conf /etc/vsftpd.conf
 RUN sed -n '54 { /if ! ps/q }; $q1' /etc/init.d/vsftpd && \
 	sed -i '54s/if ! ps/if ps/' /etc/init.d/vsftpd
 # Allow root login via FTP.
-RUN sed -i /root/d /etc/ftpusers
-RUN echo pasv_min_port=10100\\npasv_max_port=10200 >> /etc/vsftpd.conf
+RUN echo pasv_min_port=10100\\npasv_max_port=20100 >> /etc/vsftpd.conf
 EXPOSE 21
-EXPOSE 10100-10200
+EXPOSE 10100-20100
 
 # Install gsutil.
 RUN apt-get install gnupg2 software-properties-common
