@@ -75,6 +75,9 @@
 
 ## Update
 
+Use [v2tec/watchtower](https://github.com/v2tec/watchtower) for completely
+automated updates, or use the following procedure for startup or manual update:
+
 ```shell
 $ alias docker_run_comicslate='docker run \
     --detach --restart=unless-stopped --net=host \
