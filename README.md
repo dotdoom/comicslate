@@ -85,11 +85,9 @@ $ alias docker_run_comicslate='docker run \
     --mount type=bind,source=/var/www,target=/var/www \
     dotdoom/comicslate:latest'
 $ docker pull dotdoom/comicslate:latest &&
-    password="$(docker exec comicslate getent shadow root | cut -d: -f2)" &&
     docker rename comicslate{,_old} &&
     docker stop comicslate_old &&
     docker_run_comicslate &&
-    docker exec comicslate usermod -p "${password?}" root &&
     docker logs -f comicslate
 
 # Verify that the new website works.
@@ -120,8 +118,6 @@ $ docker exec -it comicslate bash
 ```
 
 ## TODO
-
-* consider using `VOLUME` for certificates and password
 
 * consider newer nullmailer (2+ has easier configuration) and certbot (0.19+
   supports certificate renewal hook directories), available from
