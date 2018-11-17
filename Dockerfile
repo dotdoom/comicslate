@@ -6,14 +6,14 @@ RUN echo \
 	'APT::Get::Assume-Yes "true";' \
 	'APT::Install-Suggests "0";' \
 	'APT::Install-Recommends "0";' > /etc/apt/apt.conf.d/90forceyes.conf
-RUN apt update
+RUN apt-get update
 
 # Install syslog for tools like cron and vsftpd.
-RUN apt install syslog-ng
+RUN apt-get install syslog-ng
 COPY src/syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
 
 # Configure FTP server for admin access.
-RUN apt install vsftpd
+RUN apt-get install vsftpd
 COPY src/vsftpd.conf /etc/vsftpd.conf
 # Fix for https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=911396
 RUN sed -n '54 { /if ! ps/q }; $q1' /etc/init.d/vsftpd && \
@@ -25,20 +25,20 @@ EXPOSE 21
 EXPOSE 10100-10200
 
 # Install gsutil.
-RUN apt install gnupg2 software-properties-common
+RUN apt-get install gnupg2 software-properties-common
 RUN echo "deb http://packages.cloud.google.com/apt \
 	cloud-sdk-$(lsb_release -c -s) main" \
 	> /etc/apt/sources.list.d/google-cloud-sdk.list
 RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-RUN apt update && apt install google-cloud-sdk
+RUN apt-get update && apt-get install google-cloud-sdk
 
 # Automatically fetch certificates for our hostnames.
-RUN apt install python-certbot-apache
+RUN apt-get install python-certbot-apache
 RUN rm -rf /etc/letsencrypt && \
 	ln -sf /var/www/.htsecure/certificates /etc/letsencrypt
 
 # Daily cron jobs (e.g. rotate logs, create backups, update certificates etc).
-RUN apt install cron logrotate p7zip git build-essential
+RUN apt-get install cron logrotate p7zip git build-essential
 RUN git clone --depth=1 https://github.com/hoytech/vmtouch.git && \
 	cd vmtouch && make && make install && \
 	cd .. && rm -rf vmtouch
@@ -47,7 +47,7 @@ RUN echo '0 3 * * * root /usr/local/bin/serverctl cron' >> /etc/crontab
 COPY src/logrotate "/etc/logrotate.d/${HOSTNAME}"
 
 # nullmailer asks questions, ignore them because we configure it later.
-RUN DEBIAN_FRONTEND=noninteractive apt install nullmailer
+RUN DEBIAN_FRONTEND=noninteractive apt-get install nullmailer
 RUN echo "${HOSTNAME}" > /etc/mailname
 # In nullmailer Debian 1:1.13-1.2, 'mailname' is referenced as '../mailname'
 # relative to /etc/nullmailer. Symplinking /etc/nullmailer to e.g.
@@ -64,7 +64,7 @@ COPY src/php.ini "${PHP_INI_DIR}/conf.d/30-${HOSTNAME}.ini"
 EXPOSE 443
 
 # PHP extensions.
-RUN apt install libpng-dev libfreetype6-dev libjpeg62-turbo-dev && \
+RUN apt-get install libpng-dev libfreetype6-dev libjpeg62-turbo-dev && \
 	docker-php-ext-configure gd \
 		--with-freetype-dir=/usr/include/ \
 		--with-jpeg-dir=/usr/include/ && \
