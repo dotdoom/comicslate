@@ -53,6 +53,7 @@ start() {
 		--uid "$(id -u www-data)" --non-unique \
 		--gid "$(id -g www-data)" --no-user-group \
 		--home-dir ~www-data --no-create-home \
+		--shell /bin/sh \
 		--password $(</var/www/.htsecure/shadow); then
 		# Ignore "username already in use".
 		[ "$?" -eq 9 ]
