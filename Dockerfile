@@ -7,7 +7,6 @@ RUN echo \
 	'APT::Install-Suggests "0";' \
 	'APT::Install-Recommends "0";' > /etc/apt/apt.conf.d/90forceyes.conf
 RUN apt update
-RUN apt dist-upgrade
 
 # Install syslog for tools like cron and vsftpd.
 RUN apt install syslog-ng
