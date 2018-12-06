@@ -38,6 +38,9 @@ RUN rm -rf /etc/letsencrypt && \
 
 # Daily cron jobs (e.g. rotate logs, create backups, update certificates etc).
 RUN apt-get install cron logrotate p7zip git build-essential
+# Restrict loose permissions which logrotate doesn't like for security reasons.
+# Base image change: https://github.com/docker-library/php/pull/745.
+RUN . "${APACHE_ENVVARS}" && chmod 0750 "${APACHE_LOG_DIR?}"
 RUN git clone --depth=1 https://github.com/hoytech/vmtouch.git && \
 	cd vmtouch && make && make install && \
 	cd .. && rm -rf vmtouch
