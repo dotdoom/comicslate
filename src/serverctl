@@ -49,15 +49,14 @@ cron() {
 }
 
 start() {
-	if ! useradd \
+	# Add web user, ignore "username already in use".
+	useradd \
 		--uid "$(id -u www-data)" --non-unique \
 		--gid "$(id -g www-data)" --no-user-group \
 		--home-dir ~www-data --no-create-home \
 		--shell /bin/sh \
-		--password $(</var/www/.htsecure/shadow); then
-		# Ignore "username already in use".
-		[ "$?" -eq 9 ]
-	fi
+		--password $(</var/www/.htsecure/shadow) || [ "$?" -eq 9 ]
+
 	update_whitelisted_ips
 
 	# See Dockerfile for rationale why it's not a symlink.
