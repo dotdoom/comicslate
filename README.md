@@ -12,6 +12,16 @@
   # sysctl -p /etc/sysctl.d/comicslate.conf
   ```
 
+* disable SMT due to various CPU optimization bugs (optional security hardening)
+
+  In Debian, add `nosmt` to the kernel command line (`/etc/defaults/grub`), then
+  update grub config and reboot:
+
+  ```
+  # update-grub
+  # reboot
+  ```
+
 * for Docker (optimization)
 
   * enable [live-restore](
@@ -125,3 +135,5 @@ $ docker exec -it comicslate bash
 * consider newer nullmailer (2+ has easier configuration) and certbot (0.19+
   supports certificate renewal hook directories), available from
   stretch-backports
+
+* allow "worst scenario" start - no certificates, no shadow, no whitelisted IPs
