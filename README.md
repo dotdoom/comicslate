@@ -8,7 +8,7 @@
 * for `vmtouch` (locking most frequently accessed data in memory)
 
   ```
-  # echo vm.max_map_count=512000 > /etc/sysctl.d/comicslate.conf
+  # echo vm.max_map_count=1024000 > /etc/sysctl.d/comicslate.conf
   # sysctl -p /etc/sysctl.d/comicslate.conf
   ```
 
@@ -93,7 +93,7 @@ $ alias docker_run_comicslate='docker run \
     --detach --restart=unless-stopped --net=host \
     --publish 80:80 --publish 443:443 --publish 21:21 \
     --publish 10100-20100:10100-20100 \
-    --ulimit memlock=1024000000:1024000000 \
+    --ulimit memlock=2048000000 \
     --hostname=comicslate.org --name=comicslate \
     --mount type=bind,source=/var/www,target=/var/www \
     dotdoom/comicslate:latest'
