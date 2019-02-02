@@ -8,7 +8,7 @@ start() {
 }
 
 stop() {
-	kill $(pgrep vmtouch) || true
+	pkill '^vmtouch$' || echo 'vmtouch process not found' >&2
 }
 
 restart() {
