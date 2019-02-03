@@ -8,7 +8,7 @@ start() {
 }
 
 stop() {
-	pkill '^vmtouch$' || echo 'vmtouch process not found' >&2
+	pkill --exact vmtouch || echo 'vmtouch process not found' >&2
 }
 
 restart() {
