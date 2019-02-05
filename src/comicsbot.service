@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -e
+
+start() {
+	( cd /var/www/.htsecure/comicsbot && npm run build && npm start )
+}
+
+stop() {
+	pkill --exact comicsbot || echo 'comicsbot process not found' >&2
+}
+
+restart() {
+	stop
+	start
+}
+
+"$1"

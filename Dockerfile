@@ -72,6 +72,20 @@ RUN apt-get install libpng-dev libfreetype6-dev libjpeg62-turbo-dev && \
 		--with-jpeg-dir=/usr/include/ && \
 	docker-php-ext-install -j$(nproc) gd
 
+# NodeJS and Chrome for comicsbot.
+RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
+RUN apt-get install nodejs
+# See https://github.com/GoogleChrome/puppeteer/blob/master/docs/troubleshooting.md#running-puppeteer-in-docker
+RUN apt-get install -yq libgconf-2-4
+RUN apt-get install -y wget --no-install-recommends \
+    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+    && apt-get update \
+    && apt-get install -y google-chrome-unstable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst ttf-freefont \
+      --no-install-recommends
+# Service file for comicsbot.
+COPY src/comicsbot.service /etc/init.d/comicsbot
+
 # Do "grep -c" so that grep reads the whole input and curl is happy.
 # In addition, normalize the exit code (return strictly 0 or 1).
 HEALTHCHECK CMD curl -sSL --connect-to localhost \
