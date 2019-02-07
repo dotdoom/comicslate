@@ -89,4 +89,6 @@ start() {
 	exec apache2-foreground
 }
 
-"${1?command argument required}"
+cmd="${1?command argument required}"
+shift
+"${cmd?}" "$@"
