@@ -8,6 +8,9 @@ RUN echo \
 	'APT::Install-Recommends "0";' > /etc/apt/apt.conf.d/90forceyes.conf
 RUN apt-get update
 
+# Install dumb-init to properly handle and proxy signals.
+RUN apt-get install dumb-init
+
 # Install syslog for tools like cron and vsftpd.
 RUN apt-get install syslog-ng
 COPY src/syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
@@ -101,4 +104,4 @@ RUN mkdir -p /var/www/.htsecure/log && \
 	rm -rf /var/www/.htsecure
 
 ENTRYPOINT []
-CMD ["serverctl", "start"]
+CMD ["dumb-init", "--", "serverctl", "start"]

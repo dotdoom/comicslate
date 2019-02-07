@@ -119,14 +119,20 @@ start() {
 		exec bash
 	fi
 
+	# If test fails, try starting wihtout SSL certs (most common reason).
+	local apacheargs=''
+	if ! apachectl -t; then
+		failure=1
+		apacheargs='-D NoSSL'
+	fi
+
 	if [ -n "$failure" ]; then
 		notify failure 'start encountered issues'
 	else
 		notify started 'started successfully'
 	fi
 
-	# TODO(dotdoom): use dumb-init, allow start w/o SSL.
-	exec apache2-foreground
+	exec apache2-foreground $apacheargs
 }
 
 cmd="${1?command argument required}"

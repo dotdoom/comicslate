@@ -99,8 +99,6 @@
 
 ## Update
 
-TODO(dotdoom): add dumb-init.
-
 Use [v2tec/watchtower](https://github.com/v2tec/watchtower) for completely
 automated updates, or use the following procedure for startup or manual update:
 
