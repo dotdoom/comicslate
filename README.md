@@ -5,7 +5,7 @@
 
 ## Host system configuration
 
-* for `vmtouch` (locking most frequently accessed data in memory)
+* for `vmtouch` (optimization, locking most frequently accessed data in memory)
 
   ```
   # echo vm.max_map_count=1024000 > /etc/sysctl.d/comicslate.conf
@@ -56,6 +56,20 @@
 
   To apply the settings, restart Docker daemon with `systemctl restart docker`.
 
+## Optinal features
+
+* generate GCloud account credentials with "Storage Object Admin" privileges to
+  the GCS bucket for backups (`comicslate-org-backup`) and save into file:
+
+  ```shell
+  # ls -l /var/www/.htsecure/backup-service-account.json
+  -r-------- 1 root root /var/www/.htsecure/backup-service-account.json
+  ```
+
+* save alias user for `www-data` (for FTP access) to `/var/www/.htsecure/shadow`
+  in the form of `passwordhash username`. FTP has to be accessed by `www-data`
+  to ensure readability of created files and directories by the web server.
+
 ## Getting (new) certificates
 
 * disable HTTPS backend check in CloudFlare for the websites that do not have a
@@ -85,10 +99,14 @@
 
 ## Update
 
+TODO(dotdoom): add dumb-init.
+
 Use [v2tec/watchtower](https://github.com/v2tec/watchtower) for completely
 automated updates, or use the following procedure for startup or manual update:
 
 ```shell
+# Replace "latest" with "stable" to run from a stable image.
+$ comicslate_image=dotdoom/comicslate:latest
 $ alias docker_run_comicslate='docker run \
     --detach --restart=unless-stopped --net=host \
     --publish 80:80 --publish 443:443 --publish 21:21 \
@@ -96,8 +114,8 @@ $ alias docker_run_comicslate='docker run \
     --ulimit memlock=2048000000 \
     --hostname=comicslate.org --name=comicslate \
     --mount type=bind,source=/var/www,target=/var/www \
-    dotdoom/comicslate:latest'
-$ docker pull dotdoom/comicslate:latest &&
+    $comicslate_image'
+$ docker pull $comicslate_image &&
     docker rename comicslate{,_old} &&
     docker stop comicslate_old &&
     docker_run_comicslate &&
@@ -107,6 +125,13 @@ $ docker pull dotdoom/comicslate:latest &&
 
 ^C
 $ docker rm comicslate_old; docker image prune
+```
+
+If the container works, don't forget to push the changes (from your workstation)
+to `stable` branch:
+
+```shell
+$ git push origin master:stable
 ```
 
 If `docker run` fails or the new website doesn't work
@@ -126,6 +151,16 @@ stay around for inspection. Once it's done, that container can be removed with
 ## Useful commands
 
 ```shell
-$ docker logs comicslate
+# Recent logs for container, with following (^C to stop following).
+$ docker logs --since 48h -f comicslate
+
+# Enter a running container.
 $ docker exec -it comicslate bash
+
+# Start a container that otherwise fails to start.
+$ comicslate_image=dotdoom/comicslate:latest
+$ docker run -it --net=host --mount type=bind,source=/var/www,target=/var/www \
+    $comicslate_image
+# When it's even more broken, you can omit --net=host, or even add
+# "--entrypoint bash" before image name.
 ```
