@@ -129,7 +129,7 @@ If the container works, don't forget to push the changes (from your workstation)
 to `stable` branch:
 
 ```shell
-$ git push origin master:stable
+$ git fetch && git push origin origin/master:stable
 ```
 
 If `docker run` fails or the new website doesn't work
