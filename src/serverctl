@@ -4,6 +4,18 @@ set -e
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 
+notify() {
+	local subject="$1"
+	shift
+	# Ignore any errors sending mail to avoid breaking script.
+	cat <<MAIL | sendmail "${USER:-root}" || true
+Subject: $0 ${subject}
+To: ${USER}
+
+$@
+MAIL
+}
+
 update_whitelisted_ips() {
 	local whitelist=/etc/apache2/conf-available/whitelisted_ip.part
 	curl -sSL https://www.cloudflare.com/ips-v{4,6} | \
@@ -49,36 +61,54 @@ cron() {
 	test -z "$failure"
 }
 
-start() {
-	# Add web user, ignore "username already in use".
-	useradd \
-		--uid "$(id -u www-data)" --non-unique \
-		--gid "$(id -g www-data)" --no-user-group \
-		--home-dir ~www-data --no-create-home \
-		--shell /bin/sh \
-		--password $(</var/www/.htsecure/shadow) || [ "$?" -eq 9 ]
+add_user_alias() {
+	local shadow=/var/www/.htsecure/shadow
+	if [ -e "${shadow?}" ]; then
+		# Add web user, ignore "username already in use".
+		useradd \
+			--uid "$(id -u www-data)" --non-unique \
+			--gid "$(id -g www-data)" --no-user-group \
+			--home-dir ~www-data --no-create-home \
+			--shell /bin/sh \
+			--password $(<"${shadow?}") || \
+			[ "$?" -eq 9 ]
+	fi
+}
 
-	update_whitelisted_ips
+start_services() {
+	for service in "$@"; do
+		if ! service "${service?}" start; then
+			echo "Failed to start service ${service?}" >&2
+			failure=1
+		fi
+	done
+	test -z "$failure"
+}
+
+start() {
+	add_user_alias || failure=1
+	update_whitelisted_ips || failure=1
 
 	# See Dockerfile for rationale why it's not a symlink.
 	rm -rf /etc/nullmailer
 	cp -r /var/www/.htsecure/nullmailer /etc &&
 		chown -R mail:mail /etc/nullmailer &&
-		chmod -R u=rX,g=rX,o= /etc/nullmailer
+		chmod -R u=rX,g=rX,o= /etc/nullmailer || failure=1
 
-	# GCloud Service Account to be used when uploading backups. Print an
-	# error, but ignore if it fails - this is non-critical, and cron will
-	# notify if backup can not proceed.
-	gcloud -q auth activate-service-account \
-		--key-file=/var/www/.htsecure/backup-service-account.json ||
-		true
+	# GCloud Service Account to be used when uploading backups.
+	local key_file=/var/www/.htsecure/backup-service-account.json
+	if [ -e "${key_file?}" ]; then
+		gcloud -q auth activate-service-account \
+			--key-file="${key_file?}" || failure=1
+	fi
 
-	service cron start
-	service nullmailer start
-	service syslog-ng start
-	service vsftpd start
-	service vmtouch start
-	service comicsbot start
+	start_services \
+		syslog-ng \
+		nullmailer \
+		cron \
+		vsftpd \
+		vmtouch \
+		comicsbot || failure=1
 
 	# When we're in a TTY, assume that this is a debug session.
 	if [ -t 1 ]; then
@@ -86,6 +116,13 @@ start() {
 		exec bash
 	fi
 
+	if [ -n "$failure" ]; then
+		notify failure 'start encountered issues'
+	else
+		notify started 'started successfully'
+	fi
+
+	# TODO(dotdoom): use dumb-init, allow start w/o SSL.
 	exec apache2-foreground
 }
 
