@@ -102,6 +102,9 @@ start() {
 			--key-file="${key_file?}" || failure=1
 	fi
 
+	# Apache will refuse to start without logs directory.
+	mkdir -p /var/www/.htsecure/log
+
 	start_services \
 		syslog-ng \
 		nullmailer \
