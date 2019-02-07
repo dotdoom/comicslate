@@ -5,12 +5,13 @@ set -e
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 
 update_whitelisted_ips() {
+	local whitelist=/etc/apache2/conf-available/whitelisted_ip.part
 	curl -sSL https://www.cloudflare.com/ips-v{4,6} | \
-		sed 's/^/  Require ip /' \
-		> /etc/apache2/conf-available/cloudflare_ip.part
+		sed 's/^/  Require ip /' > "${whitelist?}.new"
 	getent ahosts pool.sysmon.hetzner.com | \
 		awk '!seen[$1]++ { print "  Require ip", $1 }' | \
-		sort > /etc/apache2/conf-available/hetzner_ip.part
+		sort >> "${whitelist?}.new"
+	mv -f "${whitelist?}.new" "${whitelist?}"
 }
 
 create_archives() {
