@@ -65,6 +65,12 @@ RUN a2enmod ssl rewrite headers macro ext_filter
 RUN mv "${PHP_INI_DIR}/php.ini-production" "${PHP_INI_DIR}/php.ini"
 COPY src/apache2.conf "/etc/apache2/sites-enabled/${HOSTNAME}.conf"
 COPY src/php.ini "${PHP_INI_DIR}/conf.d/30-${HOSTNAME}.ini"
+# Default site configuration is useless, and regularly logs OPTIONS Apache2 wake
+# requests to the container log, cluttering it up. Note that disabling default
+# website means that requests without or with unknown "Host" header will go to
+# the first declared VHost. This can lead to discovery of what website is
+# running on a certain IP address.
+RUN a2dissite 000-default
 # In addition to port 80 (http) from the base image, export 443 (https).
 EXPOSE 443
 
