@@ -61,7 +61,7 @@ RUN echo "${HOSTNAME}" > /etc/mailname
 # See https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=504184 (patch 12).
 
 # Configure Apache web server.
-RUN a2enmod ssl rewrite headers macro ext_filter proxy
+RUN a2enmod ssl rewrite headers macro ext_filter proxy_http
 RUN mv "${PHP_INI_DIR}/php.ini-production" "${PHP_INI_DIR}/php.ini"
 COPY src/apache2.conf "/etc/apache2/sites-enabled/${HOSTNAME}.conf"
 COPY src/php.ini "${PHP_INI_DIR}/conf.d/30-${HOSTNAME}.ini"
