@@ -93,7 +93,7 @@
       --email "${EMAIL?}" \
       --domain "${domain?}" \
       --webroot \
-      --webroot-path "${vhost_path?}"
+      --webroot-path /var/www/html
   done
   ```
 
