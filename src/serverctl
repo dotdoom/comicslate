@@ -126,10 +126,11 @@ start() {
 		apacheargs='-D NoSSL'
 	fi
 
+	local docker_repo_version="$(cat /docker_repo_version)"
 	if [ -n "$failure" ]; then
-		notify failure 'start encountered issues'
+		notify failure "$docker_repo_version: start encountered issues"
 	else
-		notify started 'started successfully'
+		notify started "$docker_repo_version: started successfully"
 	fi
 
 	exec apache2-foreground $apacheargs
