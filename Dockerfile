@@ -111,7 +111,7 @@ RUN mkdir -p /var/www/.htsecure/log && \
 
 # Save Git commit hash of this build into /docker_repo_version.
 COPY .git /tmp/repo/.git
-RUN git -C /tmp/repo rev-parse HEAD > /docker_repo_version && rm -rf /tmp/repo
+RUN git -C /tmp/repo log -1 > /docker_repo_version && rm -rf /tmp/repo
 
 ENTRYPOINT []
 CMD ["dumb-init", "--", "serverctl", "start"]

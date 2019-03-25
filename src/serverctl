@@ -8,11 +8,13 @@ notify() {
 	local subject="$1"
 	shift
 	# Ignore any errors sending mail to avoid breaking script.
-	cat <<MAIL | sendmail "${USER:-root}" || true
-Subject: $0 ${subject}
+	<<MAIL cat - /docker_repo_version | sendmail "${USER:-root}" || true
+Subject: $0: ${subject}
 To: ${USER}
 
 $@
+
+===== version information =====
 MAIL
 }
 
@@ -126,11 +128,10 @@ start() {
 		apacheargs='-D NoSSL'
 	fi
 
-	local docker_repo_version="$(cat /docker_repo_version)"
 	if [ -n "$failure" ]; then
-		notify failure "$docker_repo_version: start encountered issues"
+		notify failure 'Start encountered issues.'
 	else
-		notify started "$docker_repo_version: started successfully"
+		notify started 'Started successfully.'
 	fi
 
 	exec apache2-foreground $apacheargs
