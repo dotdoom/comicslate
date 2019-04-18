@@ -4,6 +4,8 @@ set -e
 
 start() {
 	cd /var/www/.htsecure/comicsbot &&
+		git pull &&
+		npm ci &&
 		npm run build &&
 		( npm start |& logger -t comicsbot & )
 }
