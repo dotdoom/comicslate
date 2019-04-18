@@ -70,32 +70,57 @@
   in the form of `passwordhash username`. FTP has to be accessed by `www-data`
   to ensure readability of created files and directories by the web server.
 
-## Getting (new) certificates
+## Getting certificates from scratch
 
-* disable HTTPS backend check in CloudFlare for the websites that do not have a
-  valid certificate (on the Crypto page, set SSL to Flexible)
+1. disable HTTPS backend check in CloudFlare (on the Crypto page, set SSL to
+   Flexible)
 
-* use `docker run` command line from below, but instead type `docker run -it`.
-  This will start a container in debug mode and a shell session inside it
+1. use `docker run` command line from below, but instead type `docker run -it`.
+   This will start a container in debug mode and a shell session inside it
 
-* run the following commands
+1. run the following commands
 
-  ```shell
-  # Set your email
-  $ EMAIL=example@gmail.com
+   ```shell
+   $ EMAIL=example@gmail.com
+   $ DOMAINS=({test.,}comicslate.org)
+   $ for domain in "${DOMAINS[@]?}"; do
+       certbot certonly \
+           --agree-tos \
+           --email "${EMAIL?}" \
+           --domain "${domain?}" \
+           --domain "www.${domain?}" \
+           --webroot \
+           --webroot-path /var/www/html
+     done
+   ```
 
-  # Walk through /var/www to get certificate for every domain (assuming that all
-  # files with '.' in the name are domain names).
-  $ for vhost_path in /var/www/*.*; do
-    domain="$(basename "${vhost_path?}")"
-    certbot certonly \
-      --agree-tos \
-      --email "${EMAIL?}" \
-      --domain "${domain?}" \
-      --webroot \
-      --webroot-path /var/www/html
-  done
-  ```
+## Getting certificates for a new domain
+
+1. configure the new domain in `apache2.conf` without SSL support (i.e.
+   `VirtualHost *:80` only), no ~~`Use SSL`~~
+
+1. update the server
+
+1. add the new domain to CloudFlare, but make it DNS-only (no HTTPS proxy).
+   Alternatively, set SSL to Flexible on the Crypto page, but this setting is
+   website-wide, so it is a security risk for other domains in the same site
+
+1. run the following command
+
+   ```shell
+   $ EMAIL=example@gmail.com
+   $ DOMAIN=test2.comicslate.org
+   $ docker exec -it comicslate certbot certonly \
+       --agree-tos \
+       --email "${EMAIL?}" \
+       --domain "${DOMAIN?}" \
+       --webroot \
+       --webroot-path /var/www/html
+   ```
+
+1. enable HTTPS proxy for the domain on CloudFlare, set SSL to "Full (strict)",
+   add `VirtualHost *:443` section to `apache2.conf` with `Use SSL` and update
+   the server
 
 ## Update
 
