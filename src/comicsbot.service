@@ -3,11 +3,11 @@
 set -e
 
 start() {
-	cd /var/www/.htsecure/comicsbot &&
-		git pull &&
-		npm install &&
-		npm run build &&
-		( npm start |& logger -t comicsbot & )
+	cd /var/www/.htsecure/comicsbot
+	git pull || true
+	npm install || true
+	npm run build
+	( npm start |& logger -t comicsbot & )
 }
 
 stop() {
