@@ -136,6 +136,7 @@ $ alias docker_run_comicslate='docker run \
     --publish 10100-20100:10100-20100 \
     --ulimit memlock=2048000000 \
     --hostname=comicslate.org --name=comicslate \
+    --add-host=comicslate.org:127.0.0.1 \
     --mount type=bind,source=/var/www,target=/var/www \
     $comicslate_image'
 $ docker pull $comicslate_image &&
