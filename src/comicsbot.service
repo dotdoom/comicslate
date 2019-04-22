@@ -8,6 +8,7 @@ start() {
 	npm install || true
 	npm run build
 	( npm start |& logger -t comicsbot & )
+	echo 'comicsbot started'
 }
 
 stop() {
