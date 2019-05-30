@@ -98,7 +98,7 @@ RUN apt-get install libpng-dev libfreetype6-dev libjpeg62-turbo-dev && \
 # Do "grep -c" so that grep reads the whole input and curl is happy.
 # In addition, normalize the exit code (return strictly 0 or 1).
 HEALTHCHECK CMD curl -sSL --connect-to localhost \
-	"https://${HOSTNAME}/" | grep -c freefall || false
+	"https://${HOSTNAME}/" | grep -c app.comicslate.org || false
 
 COPY src/serverctl /usr/local/bin/serverctl
 
