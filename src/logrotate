@@ -1,6 +1,6 @@
 /var/www/.htsecure/log/*.log {
 	daily
-	minsize 100k
+	minsize 5M
 	missingok
 	rotate 9
 	compress
