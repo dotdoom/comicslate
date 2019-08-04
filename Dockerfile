@@ -18,9 +18,6 @@ COPY src/syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
 # Configure FTP server for admin access.
 RUN apt-get install vsftpd
 COPY src/vsftpd.conf /etc/vsftpd.conf
-# Fix for https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=911396
-RUN sed -n '54 { /if ! ps/q }; $q1' /etc/init.d/vsftpd && \
-	sed -i '54s/if ! ps/if ps/' /etc/init.d/vsftpd
 # Allow root login via FTP.
 RUN echo pasv_min_port=10100\\npasv_max_port=20100 >> /etc/vsftpd.conf
 EXPOSE 21
