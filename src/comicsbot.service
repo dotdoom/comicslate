@@ -6,6 +6,9 @@ start() {
 	cd /var/www/.htsecure/comicsbot
 	git pull || true
 	npm install || true
+	# Rebuild binaries, for when Node.js itself updates.
+	npm rebuild || true
+	# Run tsc.
 	npm run build
 	( npm start |& logger -t comicsbot & )
 	echo 'comicsbot started'
