@@ -52,6 +52,7 @@ upload_backup() {
 }
 
 cron() {
+	local failure=''
 	update_whitelisted_ips || failure=1
 	# Reload Apache and FTP daemons to pick up new certificates.
 	service apache2 reload > /dev/null || failure=1
@@ -78,6 +79,7 @@ add_user_alias() {
 }
 
 start_services() {
+	local failure=''
 	for service in "$@"; do
 		if ! service "${service?}" start; then
 			echo "Failed to start service ${service?}" >&2
@@ -88,6 +90,7 @@ start_services() {
 }
 
 start() {
+	local failure=''
 	add_user_alias || failure=1
 	update_whitelisted_ips || failure=1
 
