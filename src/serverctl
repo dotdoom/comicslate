@@ -46,6 +46,7 @@ upload_backup() {
 		--exclude=u \
 		--exclude=./.htsecure/log \
 		--exclude=./.htsecure/archives \
+		--exclude=data/locks \
 		. | \
 		gsutil -q cp - \
 		"gs://comicslate-org-backup/backup-${backup_round?}.tar"
