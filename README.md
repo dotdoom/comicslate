@@ -1,7 +1,7 @@
 # Docker image for comicslate.org webserver
 
 [![Docker Build Status](https://img.shields.io/docker/build/dotdoom/comicslate.svg)](https://hub.docker.com/r/dotdoom/comicslate/builds/)
-[![MicroBadger Size](https://img.shields.io/microbadger/image-size/dotdoom/comicslate.svg)](https://hub.docker.com/r/dotdoom/comicslate/tags/)
+[![MicroBadger Size](https://images.microbadger.com/badges/image/dotdoom/comicslate:stable.svg)](https://hub.docker.com/r/dotdoom/comicslate/tags/)
 
 ## Host system configuration
 
