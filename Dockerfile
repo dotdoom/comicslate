@@ -58,10 +58,8 @@ RUN echo "${HOSTNAME}" > /etc/mailname
 # See https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=504184 (patch 12).
 
 # NodeJS and Chrome for comicsbot.
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 RUN apt-get install nodejs npm
-# https://github.com/nodesource/distributions/blob/master/README.md#tests
-RUN curl -sL https://deb.nodesource.com/test | bash -
+RUN npm install -g npm@latest
 # See https://github.com/GoogleChrome/puppeteer/blob/master/docs/troubleshooting.md#running-puppeteer-in-docker
 RUN apt-get install -yq libgconf-2-4
 RUN apt-get install -y wget --no-install-recommends \
