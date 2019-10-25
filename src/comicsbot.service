@@ -6,7 +6,7 @@ start() {
 	cd /var/www/.htsecure/comicsbot
 	git pull --rebase https://github.com/dotdoom/comicsbot || true
 	npm ci
-	( npm start |& logger -t comicsbot & )
+	( su --shell /bin/sh --command 'npm start' www-data |& logger -t comicsbot & )
 	echo 'comicsbot started'
 }
 
