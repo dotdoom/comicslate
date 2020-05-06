@@ -45,12 +45,18 @@
     call will complain in an obvious way. In case of iptables rules, the traffic
     will be silently intercepted by the container.
 
-  Update `/etc/docker/daemon.json`
+  * limit [log](https://docs.docker.com/config/containers/logging/json-file/)
+    file size. A long-running container will accumulate a lot of logs, and
+    `docker logs` will struggle scanning through them to display the most recent
+    entries.
+
+  Update `/etc/docker/daemon.json`:
 
   ```json
   {
     "live-restore": true,
-    "userland-proxy": false
+    "userland-proxy": false,
+    "log-opts": {"max-size": "50m", "max-file": "100"}
   }
   ```
 
