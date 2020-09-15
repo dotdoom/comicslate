@@ -5,14 +5,14 @@
 
 ## Host system configuration
 
-* for `vmtouch` (optimization, locking most frequently accessed data in memory)
+- for `vmtouch` (optimization, locking most frequently accessed data in memory)
 
   ```
   # echo vm.max_map_count=1024000 > /etc/sysctl.d/comicslate.conf
   # sysctl -p /etc/sysctl.d/comicslate.conf
   ```
 
-* disable SMT due to various CPU optimization bugs (optional security hardening)
+- disable SMT due to various CPU optimization bugs (optional security hardening)
 
   In Debian, add `nosmt` to the kernel command line (`/etc/defaults/grub`), then
   update grub config and reboot:
@@ -22,14 +22,13 @@
   # reboot
   ```
 
-* for Docker (optimization)
+- for Docker (optimization)
 
-  * enable [live-restore](
-    https://docs.docker.com/config/containers/live-restore/), which allows
+  - enable [live-restore](https://docs.docker.com/config/containers/live-restore/), which allows
     containers to keep running even when Docker daemon is restarted, for example
     due to `docker-ce` package upgrade on the host system.
 
-  * disable [userland-proxy](https://docs.docker.com/v1.7/articles/networking/),
+  - disable [userland-proxy](https://docs.docker.com/v1.7/articles/networking/),
     which means that Docker will use iptables rules instead of spawning a
     proxy process to forward each port from host to container. Note that due to
     a [missing optimization](https://github.com/moby/moby/issues/11185), each
@@ -45,7 +44,7 @@
     call will complain in an obvious way. In case of iptables rules, the traffic
     will be silently intercepted by the container.
 
-  * limit [log](https://docs.docker.com/config/containers/logging/json-file/)
+  - limit [log](https://docs.docker.com/config/containers/logging/json-file/)
     file size. A long-running container will accumulate a lot of logs, and
     `docker logs` will struggle scanning through them to display the most recent
     entries.
@@ -56,7 +55,7 @@
   {
     "live-restore": true,
     "userland-proxy": false,
-    "log-opts": {"max-size": "50m", "max-file": "100"}
+    "log-opts": { "max-size": "50m", "max-file": "100" }
   }
   ```
 
@@ -64,7 +63,7 @@
 
 ## Optinal features
 
-* generate GCloud account credentials with "Storage Object Admin" privileges to
+- generate GCloud account credentials with "Storage Object Admin" privileges to
   the GCS bucket for backups (`comicslate-org-backup`) and save into file:
 
   ```shell
@@ -72,7 +71,7 @@
   -r-------- 1 root root /var/www/.htsecure/backup-service-account.json
   ```
 
-* save alias user for `www-data` (for FTP access) to `/var/www/.htsecure/shadow`
+- save alias user for `www-data` (for FTP access) to `/var/www/.htsecure/shadow`
   in the form of `passwordhash username`. FTP has to be accessed by `www-data`
   to ensure readability of created files and directories by the web server.
 
@@ -130,12 +129,14 @@
 
 ## Update
 
-Use [v2tec/watchtower](https://github.com/v2tec/watchtower) for completely
-automated updates, or use the following procedure for startup or manual update:
+Use [watchtower](https://github.com/containrrr/watchtower) for completely
+automated updates, and use the following procedure for startup, manual update or
+**rollback to `stable`**:
 
 ```shell
-# Replace "latest" with "stable" to run from a stable image.
-$ comicslate_image=dotdoom/comicslate:latest
+# Replace "stable" with "latest" to run from a regular image.
+$ comicslate_image=dotdoom/comicslate:stable
+
 $ alias docker_run_comicslate='docker run \
     --detach --restart=unless-stopped --net=host \
     --publish 80:80 --publish 443:443 --publish 21:21 \
@@ -144,39 +145,26 @@ $ alias docker_run_comicslate='docker run \
     --hostname=comicslate.org --name=comicslate \
     --add-host=comicslate.org:127.0.0.1 \
     --mount type=bind,source=/var/www,target=/var/www \
-    $comicslate_image'
+    "${comicslate_image}"'
 $ docker pull $comicslate_image &&
     docker rename comicslate{,_old} &&
     docker stop comicslate_old &&
     docker_run_comicslate &&
     docker logs -f comicslate
+```
 
-# Verify that the new website works.
+Verify that the website works, and if so (unless you want to inspect old one):
 
+```shell
 ^C
 $ docker rm comicslate_old; docker image prune
 ```
 
-If the container works, don't forget to push the changes (from your workstation)
-to `stable` branch:
+Don't forget to push the changes (from your workstation) to `stable` branch:
 
 ```shell
 $ git fetch && git push origin origin/master:stable
 ```
-
-If `docker run` fails or the new website doesn't work
-
-```shell
-^C
-$ docker stop comicslate; \
-    docker rename comicslate{,_failed} &&
-    docker rename comicslate{_old,} &&
-    docker_run_comicslate
-```
-
-The previous container will be launched and `comicslate_failed` container will
-stay around for inspection. Once it's done, that container can be removed with
-`docker rm comicslate_failed`.
 
 ## Useful commands
 
