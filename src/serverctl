@@ -8,13 +8,17 @@ notify() {
 	local subject="$1"
 	shift
 	# Ignore any errors sending mail to avoid breaking script.
-	<<MAIL cat - /docker_repo_version | sendmail "${USER:-root}" || true
+	<<MAIL sendmail "${USER:-root}" || true
 Subject: $0: ${subject}
 To: ${USER}
 
 $@
 
+===== processes =====
+$(ps aux)
+
 ===== version information =====
+$(cat /docker_repo_version)
 MAIL
 }
 
