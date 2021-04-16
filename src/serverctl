@@ -15,7 +15,7 @@ To: ${USER}
 $@
 
 ===== processes =====
-$(ps aux)
+$(ps auxww)
 
 ===== version information =====
 $(cat /docker_repo_version)
