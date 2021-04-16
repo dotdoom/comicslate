@@ -63,14 +63,6 @@
 
 ## Optinal features
 
-- generate GCloud account credentials with "Storage Object Admin" privileges to
-  the GCS bucket for backups (`comicslate-org-backup`) and save into file:
-
-  ```shell
-  # ls -l /var/www/.htsecure/backup-service-account.json
-  -r-------- 1 root root /var/www/.htsecure/backup-service-account.json
-  ```
-
 - save alias user for `www-data` (for FTP access) to `/var/www/.htsecure/shadow`
   in the form of `passwordhash username`. FTP has to be accessed by `www-data`
   to ensure readability of created files and directories by the web server.

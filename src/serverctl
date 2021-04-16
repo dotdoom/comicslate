@@ -43,19 +43,6 @@ create_archives() {
 		/var/www/comicslate.org/data/meta >/dev/null
 }
 
-upload_backup() {
-	local backup_round="$(($(date +%_j) % 10))"
-	tar -C /var/www -cp \
-		--exclude-tag-all=purgefile \
-		--exclude=u \
-		--exclude=./.htsecure/log \
-		--exclude=./.htsecure/archives \
-		--exclude=data/locks \
-		. | \
-		gsutil -q cp - \
-		"gs://comicslate-org-backup/backup-${backup_round?}.tar"
-}
-
 cron() {
 	local failure=''
 	update_whitelisted_ips || failure=1
@@ -64,7 +51,6 @@ cron() {
 	service vsftpd restart > /dev/null || failure=1
 
 	create_archives || failure=1
-	upload_backup || failure=1
 	service vmtouch restart || failure=1
 	test -z "$failure"
 }
@@ -104,13 +90,6 @@ start() {
 	cp -r /var/www/.htsecure/nullmailer /etc &&
 		chown -R mail:mail /etc/nullmailer &&
 		chmod -R u=rX,g=rX,o= /etc/nullmailer || failure=1
-
-	# GCloud Service Account to be used when uploading backups.
-	local key_file=/var/www/.htsecure/backup-service-account.json
-	if [ -e "${key_file?}" ]; then
-		gcloud -q auth activate-service-account \
-			--key-file="${key_file?}" || failure=1
-	fi
 
 	# Apache will refuse to start without logs directory.
 	mkdir -p /var/www/.htsecure/log
