@@ -137,7 +137,7 @@ start() {
 	fi
 
 	if [ -n "$failure" ]; then
-		notify failure 'Start encountered issues.'
+		notify failure 'Start has encountered issues.'
 	else
 		notify started 'Started successfully.'
 	fi
