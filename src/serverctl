@@ -89,7 +89,9 @@ start() {
 	rm -rf /etc/nullmailer
 	cp -r /var/www/.htsecure/nullmailer /etc &&
 		chown -R mail:mail /etc/nullmailer &&
-		chmod -R u=rX,g=rX,o= /etc/nullmailer || failure=1
+		chmod -R u=rX,g=rX,o= /etc/nullmailer &&
+		chmod 0751 /etc/nullmailer &&
+		chmod 0644 /etc/nullmailer/defaulthost || failure=1
 
 	# Apache will refuse to start without logs directory.
 	mkdir -p /var/www/.htsecure/log
