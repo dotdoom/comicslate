@@ -2,11 +2,22 @@
 
 set -e
 
+__precached=0
+
+precache() {
+	if [ $__precached = 0 ]; then
+		cd /var/www/.htsecure/comicsbot
+		git pull --rebase https://github.com/dotdoom/comicsbot || true
+		npm ci
+		__precached=1
+	fi
+}
+
 start() {
-	cd /var/www/.htsecure/comicsbot
-	git pull --rebase https://github.com/dotdoom/comicsbot || true
-	npm ci
-	( su --shell /bin/sh --command 'npm start' www-data |& logger -t comicsbot & )
+	precache
+	su --shell /bin/sh --command 'npm start' www-data |& logger -t comicsbot &
+	# Give child processes a chance to spawn.
+	sleep 5
 	echo 'comicsbot started'
 }
 
@@ -15,6 +26,7 @@ stop() {
 }
 
 restart() {
+	precache
 	stop
 	start
 }
