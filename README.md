@@ -45,10 +45,10 @@
     call will complain in an obvious way. In case of iptables rules, the traffic
     will be silently intercepted by the container.
 
-  - limit [log](https://docs.docker.com/config/containers/logging/json-file/)
-    file size. A long-running container will accumulate a lot of logs, and
-    `docker logs` will struggle scanning through them to display the most recent
-    entries.
+  - [switch](https://docs.docker.com/config/containers/logging/configure/)
+    logging driver to "local" to enable automatic log rotation. A long-running
+    container will accumulate a lot of logs, and `docker logs` will struggle
+    scanning through them to display the most recent entries.
 
   Update `/etc/docker/daemon.json`:
 
@@ -56,7 +56,7 @@
   {
     "live-restore": true,
     "userland-proxy": false,
-    "log-opts": { "max-size": "50m", "max-file": "100" }
+    "log-driver": "local"
   }
   ```
 
