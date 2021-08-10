@@ -57,7 +57,7 @@ https://hub.docker.com/settings/security and set `DOCKERHUB_USERNAME` and
 
   To apply the settings, restart Docker daemon with `systemctl restart docker`.
 
-## Optinal features
+## Optional features
 
 - save alias user for `www-data` (for FTP access) to `/var/www/.htsecure/shadow`
   in the form of `passwordhash username`. FTP has to be accessed by `www-data`
