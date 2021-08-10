@@ -1,8 +1,13 @@
 # Docker image for comicslate.org webserver
 
-![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/dotdoom/comicslate)
+![Docker Build](https://github.com/dotdoom/comicslate/actions/workflows/ci.yml/badge.svg)
 ![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/dotdoom/comicslate)
-![MicroBadger Layers](https://img.shields.io/microbadger/layers/dotdoom/comicslate)
+
+## Build configuration
+
+Get a personal access token (Read, Write and Delete permission) from
+https://hub.docker.com/settings/security and set `DOCKERHUB_USERNAME` and
+`DOCKERHUB_TOKEN` secrets in GitHub repository.
 
 ## Host system configuration
 
@@ -11,16 +16,6 @@
   ```
   # echo vm.max_map_count=1024000 > /etc/sysctl.d/comicslate.conf
   # sysctl -p /etc/sysctl.d/comicslate.conf
-  ```
-
-- disable SMT due to various CPU optimization bugs (optional security hardening)
-
-  In Debian, add `nosmt` to the kernel command line (`/etc/defaults/grub`), then
-  update grub config and reboot:
-
-  ```
-  # update-grub
-  # reboot
   ```
 
 - for Docker (optimization)
