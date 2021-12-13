@@ -24,7 +24,7 @@ EXPOSE 21
 EXPOSE 10100-20100
 
 # Automatically fetch certificates for our hostnames.
-RUN apt-get install python-certbot-apache
+RUN apt-get install python3-certbot-apache
 RUN rm -rf /etc/letsencrypt && \
 	ln -sf /var/www/.htsecure/certificates /etc/letsencrypt
 
