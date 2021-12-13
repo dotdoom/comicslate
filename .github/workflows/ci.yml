@@ -5,6 +5,10 @@ on:
     branches:
       - master
       - stable
+  schedule:
+    # Since we use coarse versioning in Dockerfile, wouldn't hurt to have the
+    # latest version hanging around.  This will run on default branch only.
+    - cron: "13 4 * * *"
 
 jobs:
   docker:
