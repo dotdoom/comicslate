@@ -3,10 +3,11 @@
 set -e
 
 __precached=0
+cd /var/www/.htsecure/comicsbot
 
 precache() {
 	if [ $__precached = 0 ]; then
-		cd /var/www/.htsecure/comicsbot
+		git init
 		git pull --rebase https://github.com/dotdoom/comicsbot || true
 		npm ci
 		__precached=1
@@ -15,19 +16,28 @@ precache() {
 
 start() {
 	precache
-	su --shell /bin/sh --command 'npm start' www-data |& logger -t comicsbot &
+	if [ -f config/config.json ]; then
+		su --shell /bin/sh --command 'npm start' www-data |& logger -t comicsbot &
+	else
+		echo 'config not found, assuming test run' >&2
+		cp config/config.example.json config/config.json
+		su --shell /bin/sh --command 'npm start' www-data &
+	fi
 	# Give child processes a chance to spawn.
 	sleep 5
 	echo 'comicsbot started'
 }
 
 stop() {
-	pkill --exact comicsbot || echo 'comicsbot process not found' >&2
+	if ! pkill -f '^comicsbot'; then
+		echo 'comicsbot process not killable' >&2
+		return 1
+	fi
 }
 
 restart() {
 	precache
-	stop
+	stop || true
 	start
 }
 
