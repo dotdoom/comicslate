@@ -59,9 +59,15 @@ RUN apt-get update && \
 	wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
 	echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' >> /etc/apt/sources.list.d/google-chrome.list && \
 	apt-get update && \
-	apt-get install google-chrome-stable fonts-noto-color-emoji
+	apt-get install google-chrome-stable fonts-noto-color-emoji libxshmfence1
 # Service file for comicsbot.
 COPY src/comicsbot.service /etc/init.d/comicsbot
+# Test that the bot can start; poor man's check for browser startup too.
+RUN mkdir -p /var/www/.htsecure/comicsbot && \
+	service comicsbot start && \
+	pgrep -a -x chrome && \
+	service comicsbot stop && \
+	rm -rf /var/www/.htsecure
 
 # Configure Apache web server.
 RUN a2enmod ssl rewrite headers macro ext_filter proxy_http
