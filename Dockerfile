@@ -63,7 +63,7 @@ RUN apt-get update && \
 # Service file for comicsbot.
 COPY src/comicsbot.service /etc/init.d/comicsbot
 # Test that the bot can start; poor man's check for browser startup too.
-RUN mkdir -p /var/www/.htsecure/comicsbot && \
+RUN mkdir /var/www/.htsecure && \
 	service comicsbot start && \
 	pgrep -a -x chrome && \
 	service comicsbot stop && \

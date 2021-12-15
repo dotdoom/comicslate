@@ -3,13 +3,26 @@
 set -e
 
 __precached=0
-cd /var/www/.htsecure/comicsbot
+
+BOT_DIRECTORY='/var/www/.htsecure/comicsbot'
+BOT_USER='www-data'
+
+if [ ! -d "${BOT_DIRECTORY?}" ]; then
+	# No need to bail out if directory does not exist. Still, lock it down.
+	mkdir -m 0700 -p "${BOT_DIRECTORY?}"
+	chown "${BOT_USER?}" "${BOT_DIRECTORY?}"
+fi
+cd "${BOT_DIRECTORY?}"
+
+__asbot() {
+	su --shell /bin/sh --command "$*" "${BOT_USER?}"
+}
 
 precache() {
 	if [ $__precached = 0 ]; then
-		git init
-		git pull --rebase https://github.com/dotdoom/comicsbot || true
-		npm ci
+		__asbot git init
+		__asbot git pull --rebase https://github.com/dotdoom/comicsbot || true
+		__asbot npm_config_cache=.npm npm ci
 		__precached=1
 	fi
 }
@@ -17,11 +30,11 @@ precache() {
 start() {
 	precache
 	if [ -f config/config.json ]; then
-		su --shell /bin/sh --command 'npm start' www-data |& logger -t comicsbot &
+		__asbot npm start |& logger -t comicsbot &
 	else
 		echo 'config not found, assuming test run' >&2
-		cp config/config.example.json config/config.json
-		su --shell /bin/sh --command 'npm start' www-data &
+		__asbot cp config/config.example.json config/config.json
+		__asbot npm start &
 	fi
 	# Give child processes a chance to spawn.
 	sleep 5
