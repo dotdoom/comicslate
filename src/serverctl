@@ -119,9 +119,14 @@ start() {
 		vmtouch \
 		comicsbot || failure=1
 
-	# When we're in a TTY, assume that this is a debug session.
 	if [ -t 1 ]; then
-		apachectl start || apachectl -D NoSSL
+		echo 'TTY detected, assuming debug session.'
+		echo 'Starting Web server in background and dropping to shell.'
+		if ! apachectl start; then
+			echo 'WARNING: starting Web server failed.' \
+				'Disabling SSL.' >&2
+			apachectl -D NoSSL
+		fi
 		exec bash
 	fi
 
