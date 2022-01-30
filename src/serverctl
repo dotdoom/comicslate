@@ -35,11 +35,6 @@ update_whitelisted_ips() {
 	curl -sSL https://www.cloudflare.com/ips-v6 | \
 		sed 's/^/  Require ip /' >> "${whitelist?}.new"
 
-	echo $'\n# Hetzner Server Monitor' >> "${whitelist?}.new"
-	getent ahosts pool.sysmon.hetzner.com | \
-		awk '!seen[$1]++ { print "  Require ip", $1 }' | \
-		sort >> "${whitelist?}.new"
-
 	mv -f "${whitelist?}.new" "${whitelist?}"
 }
 
