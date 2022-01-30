@@ -50,8 +50,8 @@ RUN echo "${HOSTNAME}" > /etc/mailname
 # See https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=504184 (patch 12).
 
 # NodeJS and Chrome for comicsbot.
-RUN apt-get install nodejs npm
-RUN npm install -g npm@latest
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash
+RUN apt-get install nodejs
 # Install Google Chrome to pull in APT dependencies -- the binary itself will
 # not be used.
 RUN apt-get update && \
