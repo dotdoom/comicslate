@@ -22,7 +22,9 @@ precache() {
 	if [ $__precached = 0 ]; then
 		__asbot git init
 		__asbot git pull --rebase https://github.com/dotdoom/comicsbot || true
-		__asbot npm_config_cache=.npm npm ci
+		__asbot \
+			npm_config_cache="${BOT_DIRECTORY?}/.npm" \
+			npm ci
 		__precached=1
 	fi
 }
