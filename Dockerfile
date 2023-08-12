@@ -51,7 +51,7 @@ RUN echo "${HOSTNAME}" > /etc/mailname
 
 # NodeJS and Chrome for comicsbot.
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash
-RUN apt-get install nodejs
+RUN apt-get install nodejs npm
 # Install Google Chrome to pull in APT dependencies -- the binary itself will
 # not be used.
 RUN apt-get update && \
