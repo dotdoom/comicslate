@@ -18,7 +18,7 @@ https://hub.docker.com/settings/security and set `DOCKERHUB_USERNAME` and
   # sysctl -p /etc/sysctl.d/comicslate.conf
   ```
 
-- for Docker (optimization)
+- for Docker
 
   - enable [live-restore](https://docs.docker.com/config/containers/live-restore/), which allows
     containers to keep running even when Docker daemon is restarted, for example
@@ -45,17 +45,36 @@ https://hub.docker.com/settings/security and set `DOCKERHUB_USERNAME` and
     container will accumulate a lot of logs, and `docker logs` will struggle
     scanning through them to display the most recent entries.
 
+  - enable TLS (option names starting with "tls") and TCP socket access to
+    remotely connect to Docker API (e.g. via Portainer).
+
   Update `/etc/docker/daemon.json`:
 
   ```json
   {
     "live-restore": true,
     "userland-proxy": false,
-    "log-driver": "local"
+    "log-driver": "local",
+    "tls": true,
+    "tlscacert": "/etc/docker/certificates/ca.pem",
+    "tlscert": "/etc/docker/certificates/servername-cert.pem",
+    "tlskey": "/etc/docker/certificates/servername-key.pem",
+    "tlsverify": true
   }
   ```
 
-  To apply the settings, restart Docker daemon with `systemctl restart docker`.
+  Edit `/lib/systemd/system/docker.service` to append a `-H` value to enable
+  TCP socket:
+
+  ```
+  ExecStart=/usr/bin/dockerd ... -H tcp://0.0.0.0:2376
+  ```
+
+  To apply Docker settings, restart Docker daemon: `systemctl restart docker`.
+  Make sure to apply systemd unit changes first (`systemctl daemon-reload`).
+
+  Once "live-restore" is enabled, Docker daemon restarts won't affect running
+  containers.
 
 ## Optional features
 
