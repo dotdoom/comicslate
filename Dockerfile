@@ -1,5 +1,13 @@
 FROM php:7.4-apache
 
+# Temporarily move into an isolated pool due to dependency on EOL PHP.
+# Keep image in top tier to evac to a non-isolated host in case of an
+# outage.
+LABEL \
+	host_affinity.type=isolated \
+	host_affinity.review=2024-10-14 \
+	qos_tier=1
+
 ARG HOSTNAME=comicslate.org
 
 RUN echo \
