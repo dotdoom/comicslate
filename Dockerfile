@@ -58,8 +58,14 @@ RUN echo "${HOSTNAME}" > /etc/mailname
 # See https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=504184 (patch 12).
 
 # NodeJS and Chrome for comicsbot.
-RUN curl -sL https://deb.nodesource.com/setup_16.x | bash
-RUN apt-get install nodejs npm
+# https://github.com/nodesource/distributions/blob/master/README.md
+RUN apt-get install ca-certificates curl gnupg
+RUN mkdir -p /etc/apt/keyrings
+RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | \
+	gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_16.x nodistro main" > /etc/apt/sources.list.d/nodesource.list
+RUN apt-get update
+RUN apt-get install nodejs
 # Install Google Chrome to pull in APT dependencies -- the binary itself will
 # not be used.
 RUN apt-get update && \
