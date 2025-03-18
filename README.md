@@ -152,6 +152,7 @@ $ alias docker_run_comicslate='docker run \
     --hostname=comicslate.org --name=comicslate \
     --add-host=comicslate.org:127.0.0.1 \
     --mount type=bind,source=/var/www,target=/var/www \
+    --tmpfs /tmp \
     "${comicslate_image}"'
 $ docker pull $comicslate_image &&
     docker rename comicslate{,_old} &&
