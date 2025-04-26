@@ -11,6 +11,8 @@ notify() {
 	<<MAIL sendmail "${USER:-root}" || true
 Subject: $0: ${subject}
 To: ${USER}
+Content-Type: text/plain; charset=utf-8
+MIME-Version: 1.0
 
 $@
 
