@@ -5,22 +5,33 @@ set -e
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 
 notify() {
-	local subject="$1"
+	local subject="$0: $1"
 	shift
 	# Ignore any errors sending mail to avoid breaking script.
 	<<MAIL sendmail "${USER:-root}" || true
-Subject: $0: ${subject}
+Subject: ${subject}
 To: ${USER}
-Content-Type: text/plain; charset=utf-8
 MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
 
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${subject}</title>
+</head>
+<body>
+<pre>
 $@
 
 ===== processes =====
-$(ps auxww)
+$(ps --forest -eo user,cputime,pmem,cmd --width 60)
 
 ===== version information =====
 $(cat /docker_repo_version)
+</pre>
+</body>
+</html>
 MAIL
 }
 
