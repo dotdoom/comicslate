@@ -1,13 +1,6 @@
 # Docker image for comicslate.org webserver
 
 ![Docker Build](https://github.com/dotdoom/comicslate/actions/workflows/ci.yml/badge.svg)
-![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/dotdoom/comicslate)
-
-## Build configuration
-
-Get a personal access token (Read, Write and Delete permission) from
-https://hub.docker.com/settings/security and set `DOCKERHUB_USERNAME` and
-`DOCKERHUB_TOKEN` secrets in GitHub repository.
 
 ## Host system configuration
 
@@ -141,8 +134,8 @@ automated updates, and use the following procedure for startup, manual update or
 **rollback to `stable`**:
 
 ```shell
-# Replace "stable" with "latest" to run from a regular image.
-$ comicslate_image=dotdoom/comicslate:stable
+# Replace "stable" with "master" to run from a regular image.
+$ comicslate_image=ghcr.io/dotdoom/comicslate:stable
 
 $ alias docker_run_comicslate='docker run \
     --detach --restart=unless-stopped --net=host \
@@ -184,7 +177,7 @@ $ docker logs --since 48h -f comicslate
 $ docker exec -it comicslate bash
 
 # Start a container that otherwise fails to start.
-$ comicslate_image=dotdoom/comicslate:latest
+$ comicslate_image=dotdoom/comicslate:master
 $ docker run -it --net=host --mount type=bind,source=/var/www,target=/var/www \
     $comicslate_image
 # When it's even more broken, you can omit --net=host, or even add
