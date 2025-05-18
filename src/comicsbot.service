@@ -20,8 +20,10 @@ __asbot() {
 
 precache() {
 	if [ $__precached = 0 ]; then
+		echo 'precaching sources'
 		__asbot git init
 		__asbot git pull --rebase https://github.com/dotdoom/comicsbot || true
+		echo 'prebuilding sources'
 		__asbot \
 			npm_config_cache="${BOT_DIRECTORY?}/.npm" \
 			npm ci
@@ -31,6 +33,7 @@ precache() {
 
 start() {
 	precache
+	echo 'starting comicsbot'
 	if [ -f config/config.json ]; then
 		__asbot npm start |& logger -t comicsbot &
 	else
