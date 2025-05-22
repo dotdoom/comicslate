@@ -26,7 +26,7 @@ precache() {
 		echo 'prebuilding sources'
 		__asbot \
 			npm_config_cache="${BOT_DIRECTORY?}/.npm" \
-			npm --loglevel info ci
+			npm --loglevel info ci --no-audit --no-save
 		__precached=1
 	fi
 }
