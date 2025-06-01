@@ -2,30 +2,35 @@
 
 set -e
 
-__precached=0
-
-BOT_DIRECTORY='/var/www/.htsecure/comicsbot'
 BOT_USER='www-data'
+BOT_DIRECTORY='/var/www/.htsecure/comicsbot'
 
 if [ ! -d "${BOT_DIRECTORY?}" ]; then
 	# No need to bail out if directory does not exist. Still, lock it down.
 	mkdir -m 0700 -p "${BOT_DIRECTORY?}"
 	chown "${BOT_USER?}" "${BOT_DIRECTORY?}"
 fi
+
+if [ "$(id -u)" -ne "$(id -u $BOT_USER)" ]; then
+	echo "Dropping privileges to ${BOT_USER?}."
+	exec su - "${BOT_USER?}" --shell /bin/sh --command "$0 $*"
+fi
+
+# Keep in sync with Dockerfile.
+source '/opt/nvm/nvm.sh'
+
 cd "${BOT_DIRECTORY?}"
 
-__asbot() {
-	su --shell /bin/sh --command "$*" "${BOT_USER?}"
-}
-
+__precached=0
 precache() {
 	if [ $__precached = 0 ]; then
 		echo 'precaching sources'
-		__asbot git init
-		__asbot git pull --rebase https://github.com/dotdoom/comicsbot || true
+		git init
+		git pull --rebase https://github.com/dotdoom/comicsbot || true
 		echo 'prebuilding sources'
-		__asbot \
-			npm_config_cache="${BOT_DIRECTORY?}/.npm" \
+		nvm install
+		nvm use
+		npm_config_cache="${BOT_DIRECTORY?}/.npm" \
 			npm --loglevel info ci --no-audit --no-save
 		__precached=1
 	fi
@@ -35,11 +40,11 @@ start() {
 	precache
 	echo 'starting comicsbot'
 	if [ -f config/config.json ]; then
-		__asbot npm start |& logger -t comicsbot &
+		npm start |& logger -t comicsbot &
 	else
 		echo 'config not found, assuming test run' >&2
-		__asbot cp config/config.example.json config/config.json
-		__asbot npm start &
+		cp config/config.example.json config/config.json
+		npm start &
 	fi
 	# Give child processes a chance to spawn.
 	sleep 5

@@ -52,12 +52,12 @@ RUN echo "${HOSTNAME}" > /etc/mailname
 # NodeJS and Chrome for comicsbot.
 # https://github.com/nodesource/distributions/blob/master/README.md
 RUN apt-get install ca-certificates curl gnupg
-RUN mkdir -p /etc/apt/keyrings
-RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | \
-	gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" > /etc/apt/sources.list.d/nodesource.list
-RUN apt-get update
-RUN apt-get install nodejs
+# Keep in sync with src/comicsbot.service.
+ENV NVM_DIR=/opt/nvm
+RUN mkdir -p "${NVM_DIR?}" && chown www-data "${NVM_DIR?}"
+USER www-data
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+USER root
 # Install Google Chrome to pull in APT dependencies -- the binary itself will
 # not be used.
 RUN apt-get update && \
