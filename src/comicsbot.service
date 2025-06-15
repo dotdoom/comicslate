@@ -52,10 +52,13 @@ start() {
 }
 
 stop() {
-	if ! pkill -f '^comicsbot'; then
-		echo 'comicsbot process not killable' >&2
-		return 1
-	fi
+	# Attempt to kill gracefully. Exit the loop by pkill not recognizing
+	# the signal.
+	set -- TERM TERM KILL BOGUS
+	while pkill -"$1" -f '^comicsbot' 2>/dev/null; do
+		sleep 1
+		shift
+	done || true
 }
 
 restart() {
