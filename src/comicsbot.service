@@ -52,6 +52,7 @@ start() {
 }
 
 stop() {
+	echo 'stopping comicsbot'
 	# Attempt to kill gracefully. Exit the loop by pkill not recognizing
 	# the signal.
 	set -- TERM TERM KILL BOGUS

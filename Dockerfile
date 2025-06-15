@@ -71,7 +71,7 @@ COPY src/comicsbot.service /etc/init.d/comicsbot
 # Test that the bot can start; poor man's check for browser startup too.
 RUN mkdir /var/www/.htsecure && \
 	service comicsbot start && \
-	pgrep -a -x chrome && \
+	pgrep -a -x chrome-headless && \
 	service comicsbot stop && \
 	rm -rf /var/www/.htsecure
 
