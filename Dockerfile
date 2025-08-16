@@ -19,9 +19,9 @@ COPY src/syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
 RUN apt-get install vsftpd
 COPY src/vsftpd.conf /etc/vsftpd.conf
 # Allow root login via FTP.
-RUN echo pasv_min_port=10100\\npasv_max_port=20100 >> /etc/vsftpd.conf
+RUN echo pasv_min_port=20100\\npasv_max_port=20500 >> /etc/vsftpd.conf
 EXPOSE 21
-EXPOSE 10100-20100
+EXPOSE 20100-20500
 
 # Automatically fetch certificates for our hostnames.
 RUN apt-get install python3-certbot-apache
