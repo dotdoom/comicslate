@@ -1,0 +1,7 @@
+# direnv
+/.direnv
+
+# nix build output symlink
+/result
+# nixos-rebuild build-vm disk
+/nixos.qcow2
