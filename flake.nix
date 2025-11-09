@@ -234,6 +234,7 @@
 
               environment.systemPackages = [
                 pkgs.htop
+                pkgs.chromium
               ];
 
               fileSystems.${persistenceCommon}.neededForBoot = true;
