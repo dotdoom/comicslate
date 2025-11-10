@@ -76,7 +76,7 @@ RUN mkdir /var/www/.htsecure && \
 	rm -rf /var/www/.htsecure
 
 # Configure Apache web server.
-RUN a2enmod ssl rewrite headers macro ext_filter proxy_http
+RUN a2enmod ssl rewrite headers macro ext_filter proxy_http dav dav_fs auth_basic authn_file
 RUN mv "${PHP_INI_DIR}/php.ini-production" "${PHP_INI_DIR}/php.ini"
 COPY src/apache2.conf "/etc/apache2/sites-enabled/${HOSTNAME}.conf"
 COPY src/php.ini "${PHP_INI_DIR}/conf.d/30-${HOSTNAME}.ini"
