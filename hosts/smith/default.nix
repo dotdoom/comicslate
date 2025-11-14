@@ -192,20 +192,37 @@
     pkgs.cloudflared
   ];
 
-  sops.secrets."cloudflare-tunnel-6adfa8a1-9b6c-4bb2-9e54-115e165fd7db" = {
-    sopsFile = secrets/cloudflare-tunnel-6adfa8a1-9b6c-4bb2-9e54-115e165fd7db.json.bin;
+  sops.secrets.cloudflare-tunnel-comicslate = {
+    sopsFile = secrets/cloudflare-tunnel-comicslate.json.bin;
     format = "binary";
   };
-
+  sops.secrets."cloudflare-tunnel-cert" = {
+    sopsFile = secrets/cloudflare-tunnel-cert.pem;
+    format = "binary";
+  };
+  services.httpd.enable = true;
   services.cloudflared = {
     enable = true;
+    certificateFile = config.sops.secrets."cloudflare-tunnel-cert".path;
     tunnels = {
-      "6adfa8a1-9b6c-4bb2-9e54-115e165fd7db" = {
-        credentialsFile = config.sops.secrets."cloudflare-tunnel-6adfa8a1-9b6c-4bb2-9e54-115e165fd7db".path;
+      "comicslate" = {
+        credentialsFile = config.sops.secrets.cloudflare-tunnel-comicslate.path;
+        ingress = {
+          # Remember to create a proxied CNAME to "<tunnelid>.cfargotunnel.com".
+          "web2.comicslate.org" = "http://localhost:80";
+          "ssh.comicslate.org" = "ssh://localhost:22";
+        };
         default = "http_status:404";
+        # For QUIC:
+        # sysctl -w net.core.rmem_max=7500000
+        # sysctl -w net.core.wmem_max=7500000
       };
     };
   };
+
+  # TODO: https://github.com/NixOS/nixpkgs/pull/448934
+  systemd.services.cloudflared-tunnel-comicslate.environment.TUNNEL_EDGE_IP_VERSION = "6";
+
   services.openssh.settings.Macs = lib.mkAfter [
     # Current defaults:
     "hmac-sha2-512-etm@openssh.com"
