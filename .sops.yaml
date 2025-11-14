@@ -1,0 +1,18 @@
+# Making a change? Remember to "sops updatekeys **/secrets/*" in "nix develop" shell!
+
+x-client-keys:
+  # age-plugin-yubikey -i | grep Recipient
+  artem-yubikey-keychain: &artem-yubikey-keychain "age1yubikey1qff6puqp64kv6kzz8gql992nfxp5d3fmtapacafxqhw4vqwe6agkyqxg35m"
+  artem-yubikey-safe: &artem-yubikey-safe "age1yubikey1qvtm0m3wy6yfcl0ndjhl7cdfnnqkhkple0twc6udr0fp0qy3c6thvy3w7vf"
+
+x-server-keys:
+  # ssh-keyscan smith.comicslate.org | ssh-to-age
+  smith: &smith "age1d3588k5jne8aqe26uetgdjstayeytcr0j52lahj3n7z5lxp4vf9q4gp9t4"
+
+creation_rules:
+  - path_regex: "hosts/smith/secrets/[^/]+$"
+    key_groups:
+      - age:
+          - *artem-yubikey-keychain
+          - *artem-yubikey-safe
+          - *smith
