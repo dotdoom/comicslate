@@ -57,7 +57,11 @@
   systemd.network.networks."20-ether-static" = {
     matchConfig.Type = "ether";
     networkConfig = {
-      DHCP = "no"; # TODO: ipv4 for fetching github (nixpkgs), github container registry (RSS bot), RSS feeds, connect bot to Discord
+      # - fetch GitHub (nixpkgs)
+      # - fetch ghcr.io (RSS bot)
+      # - fetch RSS feeds (RSS bot)
+      # - connect to Discord (RSS bot)
+      DHCP = "ipv4";
       Address = [ "2a01:4f9:c010:dff6::2/64" ];
     };
     routes = [
@@ -190,6 +194,7 @@
           # i.e.
           # $ cloudflared tunnel route dns comicslate web2.comicslate.org
           "web2.comicslate.org" = "http://localhost:80";
+          "osp.dget.cc" = "http://localhost:80";
 
           # Create an Application for browser based access without installing
           # "cloudflared" on the client.
@@ -264,6 +269,9 @@
             AllowOverride All
           </Directory>
         '';
+      };
+      "osp.dget.cc" = {
+        documentRoot = "/var/www/osp.dget.cc";
       };
     };
   };
