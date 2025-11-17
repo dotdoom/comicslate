@@ -204,7 +204,7 @@
           # $ cloudflared tunnel route dns <tunnel-name> <dns-record>
           # i.e.
           # $ cloudflared tunnel route dns comicslate web2.comicslate.org
-          "web2.comicslate.org" = "http://localhost:80";
+          "test.comicslate.org" = "http://localhost:80";
           "osp.dget.cc" = "http://localhost:80";
 
           # Create an Application for browser based access without installing
@@ -272,10 +272,10 @@
       sendmail_path = /usr/sbin/sendmail -t -i
     '';
     virtualHosts = {
-      "web2.comicslate.org" = {
-        documentRoot = "/var/www/test.comicslate.org";
+      "test.comicslate.org" = {
+        documentRoot = "/var/www/new/comicslate.org";
         extraConfig = ''
-          <Directory /var/www/test.comicslate.org>
+          <Directory /var/www/new/comicslate.org>
             Options FollowSymLinks MultiViews
             AllowOverride All
           </Directory>
