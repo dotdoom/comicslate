@@ -129,6 +129,7 @@
                 type = "filesystem";
                 format = "ext4";
                 mountpoint = "/persistent";
+                mountOptions = [ "noatime" ];
               };
             };
             nix = {
@@ -137,6 +138,7 @@
                 type = "filesystem";
                 format = "ext4";
                 mountpoint = "/nix";
+                mountOptions = [ "noatime" ];
               };
             };
           };
@@ -179,6 +181,15 @@
     # command line (e.g. "cloudflared tunnel list").
     path = "/root/.cloudflared/cert.pem";
     format = "binary";
+  };
+
+  fileSystems."/var/www/new" = {
+    device = "/dev/disk/by-id/scsi-0HC_Volume_103973620";
+    fsType = "ext4";
+    options = [
+      "nofail"
+      "noatime"
+    ];
   };
 
   services.cloudflared = {
