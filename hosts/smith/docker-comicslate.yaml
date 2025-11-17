@@ -1,0 +1,23 @@
+name: comicslate
+services:
+  rss:
+    image: "localhost/comicslate:latest"
+    build:
+      context: ../..
+      # dockerfile: Dockerfile
+    pull_policy: never
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /var/www
+        target: /var/www
+    network_mode: bridge
+    ports:
+      - 80:80/tcp
+    tmpfs:
+      - /tmp
+    ulimits:
+      memlock: 2048000000
+    hostname: comicslate.org
+    extra_hosts:
+      - "comicslate.org=127.0.0.1"

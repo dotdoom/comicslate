@@ -7,7 +7,7 @@ x-client-keys:
 
 x-server-keys:
   # ssh-keyscan smith.comicslate.org | ssh-to-age
-  smith: &smith "age1d3588k5jne8aqe26uetgdjstayeytcr0j52lahj3n7z5lxp4vf9q4gp9t4"
+  smith: &smith "age1d3addy9h8vwrvcerufet5y8zy5cnmspt3krgrf95kcrsd6lwdags347tfr"
 
 creation_rules:
   - path_regex: "hosts/smith/secrets/[^/]+$"

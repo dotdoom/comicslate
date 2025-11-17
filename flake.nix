@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    phps.url = "github:fossar/nix-phps";
     flake-utils.url = "github:numtide/flake-utils";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     sops-nix = {
@@ -33,13 +34,14 @@
       # nixos-rebuild build-vm --flake .#smith
       # QEMU_KERNEL_PARAMS=console=ttyS0 result/bin/run-nixos-vm -nographic; reset
       nixosConfigurations.smith = nixpkgs.lib.nixosSystem {
-        system = "aarch64-linux";
+        system = "x86_64-linux";
         specialArgs = {
           persistenceCommon = "/persistent";
           trusted-ssh-keys = [
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBxRBsFGa8OFbviYDGSAKLgfm/K2XUxvCo+31FW37yab artem"
             "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBCW0Pq7WVNeIRJDgPi0ux3ajwhs/QEy5Ya8GG+STYMjApnfqkfG4OKh59BJHlsb354L5MpiV1YPIbW7ryw+ibuA= artem@corp-titan-nano-macbook"
           ];
+          phps = inputs.phps.packages.x86_64-linux;
         };
 
         modules = [

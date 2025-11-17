@@ -5,25 +5,28 @@
   pkgs,
   config,
   trusted-ssh-keys,
+  phps,
   ...
 }:
 {
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
+    # ./docker.nix
   ];
 
-  boot.loader.systemd-boot.configurationLimit = 5;
+  boot.loader.grub.configurationLimit = 5;
+
   networking.hostName = "smith";
   networking.domain = "comicslate.org";
+  networking.hosts = {
+    "2a01:4f8:c010:d56::6" = [ "ghcr.io" ]; # https://danwin1210.de/github-ipv6-proxy.php
+  };
 
   services.qemuGuest.enable = true;
   # workaround because the console defaults to serial
   boot.kernelParams = [ "console=tty" ];
   # initialize the display early to get a complete log
-  boot.initrd.kernelModules = [
-    "virtio_gpu"
-    "zfs"
-  ];
+  boot.initrd.kernelModules = [ "virtio_gpu" ];
 
   sops.secrets.root-password = {
     sopsFile = secrets/root-password.bin;
@@ -44,9 +47,6 @@
     ];
   };
 
-  boot.zfs.devNodes = "/dev/disk/by-path";
-
-  boot.loader.systemd-boot.enable = true;
   users.users.root.openssh.authorizedKeys.keys = trusted-ssh-keys;
   networking.hostId = "474ffba4";
 
@@ -54,14 +54,10 @@
   networking.useDHCP = false;
   networking.dhcpcd.enable = false;
 
-  systemd.network.links."10-wan" = {
-    matchConfig.MACAddress = "92:00:06:b5:fe:47";
-    linkConfig.Name = "wan0";
-  };
-  systemd.network.networks."20-wan-static" = {
-    matchConfig.Name = "wan0";
+  systemd.network.networks."20-ether-static" = {
+    matchConfig.Type = "ether";
     networkConfig = {
-      DHCP = "no";
+      DHCP = "no"; # TODO: ipv4 for fetching github (nixpkgs), github container registry (RSS bot), RSS feeds, connect bot to Discord
       Address = [ "2a01:4f9:c010:dff6::2/64" ];
     };
     routes = [
@@ -73,100 +69,72 @@
   # 1. IPv4 required for GitHub access (wtf lol?). You can remove
   #    this paid address once nixos-rebuild works remotely.
   # 2. disko-install is copying files into /nix (overlayfs on iso)
-  #    first, running out of 2GB RAM.
+  #    first, running out of 2GB RAM, so we use nixos-install directly.
   #
   # Installation:
   # 1. Mount NixOS ISO
   # 2. sudo passwd
-  # 3. ssh-copy-id
-  # 4. sudo passwd -l root
-  # 5. rm -rf comicslate/{result,*.qcow2,.direnv}
+  # 3. ip addr add pref::2/64 dev enp1s0 &&
+  #    ip ro add default via fe80::1 dev enp1s0
+  # 4. ssh-copy-id
+  # 5. sudo passwd -l root
+  # 6. rm -rf comicslate/{result,*.qcow2,.direnv}
   #    scp -r comicslate root@smith.comicslate.org
-  # 6. nix --extra-experimental-features 'nix-command flakes' \
+  # 7. nix --extra-experimental-features 'nix-command flakes' \
   #      run nixpkgs#disko -- \
   #        --yes-wipe-all-disks \
   #        --flake ~/comicslate#smith \
   #        --mode destroy,format,mount
-  # 7. cd /mnt && nixos-install --flake ~/comicslate#smith
-  # 8. reboot
+  # 8. cd /mnt && nixos-install --flake ~/comicslate#smith
+  # 9. reboot
   disko.devices = {
-    disk = builtins.listToAttrs (
-      lib.lists.imap1 (index: path: {
-        name = "root";
-        value = {
-          device = path;
-          type = "disk";
-          content = {
-            type = "gpt";
-            partitions = {
-              ESP = {
-                size = "1G";
-                type = "EF00";
-                content = {
-                  type = "filesystem";
-                  format = "vfat";
-                  mountpoint = "/boot";
-                  mountOptions = [
-                    "fmask=0077"
-                    "dmask=0077"
-                    # Mounting /boot is only needed for bootloader updates,
-                    # it's not important during boot.
-                    "x-systemd.automount"
-                  ];
-                };
-              };
-              swap = {
-                size = "8G";
-                content = {
-                  type = "swap";
-                  discardPolicy = "once";
-                  randomEncryption = true;
-                };
-              };
-              root = {
-                size = "100%";
-                content = {
-                  type = "zfs";
-                  pool = "rpool";
-                };
+    disk = {
+      root = {
+        device = "/dev/sda";
+        type = "disk";
+        content = {
+          # x86 Hetzner VMs only support legacy (non-EFI) boot.
+          # Assuming 20GB+ disk.
+          # ZFS doesn't make sense in single-disk, RAM-constrained VM env.
+          type = "gpt";
+          partitions = {
+            boot = {
+              size = "8M";
+              type = "EF02"; # for grub MBR
+            };
+            ESP = {
+              size = "512M";
+              type = "EF00";
+              content = {
+                type = "filesystem";
+                format = "vfat";
+                mountpoint = "/boot";
+                mountOptions = [ "umask=0077" ];
               };
             };
-          };
-        };
-      }) [ "/dev/sda" ]
-    );
-    # See also modules/zfs.nix
-    zpool = {
-      rpool = {
-        type = "zpool";
-        mode = "";
-        options = {
-          ashift = "12";
-          autoexpand = "off";
-        };
-        rootFsOptions = {
-          mountpoint = "none";
-          compression = "lz4";
-          xattr = "sa";
-          atime = "off";
-          dedup = "off";
-          acltype = "off";
-          recordsize = "64k";
-        };
-        datasets = {
-          nix = {
-            type = "zfs_fs";
-            options.mountpoint = "legacy";
-            mountpoint = "/nix";
-          };
-          persistent = {
-            type = "zfs_fs";
-            options.mountpoint = "legacy";
-            mountpoint = persistenceCommon;
-          };
-          reserved = {
-            type = "zfs_fs";
-            options.refreservation = "4G"; # ~10% assuming 40GB disk
+            swap = {
+              size = "8G";
+              content = {
+                type = "swap";
+                discardPolicy = "once";
+              };
+            };
+            persistence = {
+              size = "1G";
+              content = {
+                type = "filesystem";
+                format = "ext4";
+                mountpoint = "/persistent";
+              };
+            };
+            nix = {
+              size = "100%";
+              content = {
+                type = "filesystem";
+                format = "ext4";
+                mountpoint = "/nix";
+              };
+            };
           };
         };
       };
@@ -179,17 +147,18 @@
         mountpoint = "/";
         mountOptions = [
           "defaults"
-          "size=3G"
+          "size=2G" # out of 4GB RAM
           "mode=755" # only root can write to those files
         ];
       };
     };
   };
 
-  environment.systemPackages = [
-    pkgs.htop
-    pkgs.chromium
-    pkgs.cloudflared
+  environment.systemPackages = with pkgs; [
+    htop
+    cloudflared
+    tcpdump
+    ncdu
   ];
 
   sops.secrets.cloudflare-tunnel-comicslate = {
@@ -207,7 +176,7 @@
     path = "/root/.cloudflared/cert.pem";
     format = "binary";
   };
-  services.httpd.enable = true;
+
   services.cloudflared = {
     enable = true;
     certificateFile = config.sops.secrets."cloudflare-tunnel-cert".path;
@@ -215,12 +184,23 @@
       "comicslate" = {
         credentialsFile = config.sops.secrets.cloudflare-tunnel-comicslate.path;
         ingress = {
-          # Remember to create a proxied CNAME to "<tunnelid>.cfargotunnel.com".
+          # Remember to create a proxied CNAME to "<tunnelid>.cfargotunnel.com",
+          # e.g. automatically using
+          # $ cloudflared tunnel route dns <tunnel-name> <dns-record>
+          # i.e.
+          # $ cloudflared tunnel route dns comicslate web2.comicslate.org
           "web2.comicslate.org" = "http://localhost:80";
-          "ssh.comicslate.org" = "ssh://localhost:22";
+
+          # Create an Application for browser based access without installing
+          # "cloudflared" on the client.
+          "smith-ssh.comicslate.org" = "ssh://localhost:22";
+          # TODO: smith.comicslate.org, and use IP address for emergency
+          # reachability only.
+          # This is not working at all, neither web nor command line. Why?
+          # Check out https://developers.cloudflare.com/cloudflare-one/tutorials/gitlab/
         };
         default = "http_status:404";
-        # For QUIC:
+        # TODO for QUIC:
         # sysctl -w net.core.rmem_max=7500000
         # sysctl -w net.core.wmem_max=7500000
       };
@@ -238,6 +218,12 @@
     # Added for cloudflare SSH browser rendering:
     "hmac-sha2-256"
   ];
+  services.openssh.extraConfig = ''
+    Match Address 127.0.0.1
+      # Enable password authentication over cloudflared tunnel, which is already
+      # secured by Cloudflare login.
+      PasswordAuthentication yes
+  '';
 
   fileSystems.${persistenceCommon}.neededForBoot = true;
   environment.persistence.${persistenceCommon} = {
@@ -245,12 +231,41 @@
     directories = [
       "/var/lib/nixos" # auto-generated UID and GID maps
       "/var/lib/systemd" # timers, random seed, clock sync etc
+      "/var/lib/docker" # rss bot
+      "/var/www" # TODO: remove!
     ];
     files = [
       "/etc/machine-id"
-      "/etc/zfs/zpool.cache"
       "/etc/ssh/ssh_host_ed25519_key"
     ];
+  };
+
+  services.httpd = {
+    enable = true;
+    enablePHP = true;
+    phpPackage = phps.php74;
+    phpOptions = ''
+      ; Doku relies on filesystem lookup a lot, this cache is handy.
+      realpath_cache_size = 40M
+      ; There's also a limit in CloudFlare, up to 100MB on free plan.
+      upload_max_filesize = 15M
+      post_max_size = 15M
+      ; Some processes can grow really large.
+      memory_limit = 1G
+      ; sendmail command line working with nullmailer
+      sendmail_path = /usr/sbin/sendmail -t -i
+    '';
+    virtualHosts = {
+      "web2.comicslate.org" = {
+        documentRoot = "/var/www/test.comicslate.org";
+        extraConfig = ''
+          <Directory /var/www/test.comicslate.org>
+            Options FollowSymLinks MultiViews
+            AllowOverride All
+          </Directory>
+        '';
+      };
+    };
   };
 
   # Doesn't matter with impermanence, and better to know that on
