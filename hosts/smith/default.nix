@@ -183,7 +183,7 @@
     format = "binary";
   };
 
-  fileSystems."/var/www/new" = {
+  fileSystems."/var/www" = {
     device = "/dev/disk/by-id/scsi-0HC_Volume_103973620";
     fsType = "ext4";
     options = [
@@ -248,7 +248,6 @@
       "/var/lib/nixos" # auto-generated UID and GID maps
       "/var/lib/systemd" # timers, random seed, clock sync etc
       "/var/lib/docker" # rss bot
-      "/var/www" # TODO: remove!
     ];
     files = [
       "/etc/machine-id"
@@ -273,9 +272,9 @@
     '';
     virtualHosts = {
       "test.comicslate.org" = {
-        documentRoot = "/var/www/new/comicslate.org";
+        documentRoot = "/var/www/comicslate.org";
         extraConfig = ''
-          <Directory /var/www/new/comicslate.org>
+          <Directory /var/www/comicslate.org>
             Options FollowSymLinks MultiViews
             AllowOverride All
           </Directory>
