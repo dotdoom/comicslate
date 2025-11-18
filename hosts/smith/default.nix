@@ -11,7 +11,6 @@
 {
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
-    # ./docker.nix
   ];
 
   boot.loader.grub.configurationLimit = 5;
@@ -21,6 +20,9 @@
   networking.hosts = {
     "2a01:4f8:c010:d56::6" = [ "ghcr.io" ]; # https://danwin1210.de/github-ipv6-proxy.php
   };
+
+  networking.firewall.enable = true;
+  networking.nftables.enable = true;
 
   services.qemuGuest.enable = true;
   # workaround because the console defaults to serial
@@ -37,7 +39,7 @@
 
   services.openssh = {
     enable = true;
-    # TODO: enable firewall and add firewall rule here.
+    openFirewall = true;
     hostKeys = [
       # Don't need RSA.
       {
@@ -55,7 +57,7 @@
   networking.dhcpcd.enable = false;
 
   systemd.network.networks."20-ether-static" = {
-    matchConfig.Type = "ether";
+    matchConfig.Name = "en*"; # only physical interfaces - avoid managing veth.
     networkConfig = {
       # - fetch GitHub (nixpkgs)
       # - fetch ghcr.io (RSS bot)
@@ -165,6 +167,7 @@
     cloudflared
     tcpdump
     ncdu
+    vim
   ];
 
   sops.secrets.cloudflare-tunnel-comicslate = {
@@ -243,13 +246,27 @@
       PasswordAuthentication yes
   '';
 
+  virtualisation.podman.enable = true;
+  virtualisation.oci-containers.containers = {
+    monitorss = {
+      image = "docker.io/synzen/monitorss:latest";
+      volumes = [
+        "/var/www/.htsecure/Discord.RSS:/data"
+      ];
+      environment = {
+        DRSS_DATABASE_URI = "/data";
+        DRSS_BOT_TOKEN = "sikret";
+      };
+    };
+  };
+
   fileSystems.${persistenceCommon}.neededForBoot = true;
   environment.persistence.${persistenceCommon} = {
     # https://nixos.org/manual/nixos/stable/#sec-nixos-state
     directories = [
       "/var/lib/nixos" # auto-generated UID and GID maps
       "/var/lib/systemd" # timers, random seed, clock sync etc
-      "/var/lib/docker" # rss bot
+      "/var/lib/containers" # podman: rss bot
     ];
     files = [
       "/etc/machine-id"
