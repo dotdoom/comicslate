@@ -195,6 +195,68 @@
     ];
   };
 
+  nixpkgs.config.allowUnfree = true; # for google-chrome
+  systemd.services.comicsbot = {
+    description = "comics renderer";
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    wantedBy = [ "multi-user.target" ];
+
+    path = with pkgs; [
+      nodejs_20
+      git
+      bash
+      coreutils
+    ];
+
+    serviceConfig = {
+      User = "wwwrun";
+      # Group = "wwwrun";
+      WorkingDirectory = "/var/www/.htsecure/comicsbot";
+
+      # Restart automatically if it crashes
+      Restart = "always";
+      RestartSec = "10s";
+
+      # Basic hardening (Optional but recommended)
+      ProtectSystem = "full";
+      PrivateTmp = true;
+    };
+
+    environment = {
+      CHROME_EXECUTABLE_PATH = lib.getExe pkgs.google-chrome;
+    };
+
+    preStart = ''
+      if [ ! -d .git ]; then
+        echo "Initializing git..."
+        git init
+        git remote add origin https://github.com/dotdoom/comicsbot || true
+      fi
+
+      echo "Updating sources..."
+      git fetch origin
+      git pull --rebase origin master || echo "Git pull failed, attempting to continue..."
+
+      if [ ! -f config/config.json ]; then
+        echo "Config not found, creating from example..."
+        mkdir -p config
+        if [ -f config/config.example.json ]; then
+          cp config/config.example.json config/config.json
+        fi
+      fi
+
+      echo "Installing dependencies..."
+      # We set the cache to a local folder to avoid permission issues
+      export npm_config_cache="$PWD/.npm"
+      npm ci --loglevel info --no-audit --no-save
+    '';
+
+    script = ''
+      npm start
+    '';
+  };
+
   services.cloudflared = {
     enable = true;
     certificateFile = config.sops.secrets."cloudflare-tunnel-cert".path;
@@ -210,6 +272,7 @@
           "comicslate.org" = "http://localhost:80";
           "admin.comicslate.org" = "http://localhost:80";
           "test.comicslate.org" = "http://localhost:80";
+          "app.comicslate.org" = "http://localhost:80";
           "osp.dget.cc" = "http://localhost:80";
 
           # Create an Application for browser based access without installing
@@ -295,6 +358,11 @@
       ; sendmail command line working with nullmailer
       sendmail_path = /usr/sbin/sendmail -t -i
     '';
+    extraModules = [
+      # For "AddOutputFilterByType DEFLATE":
+      "filter"
+      "deflate"
+    ];
     virtualHosts = {
       "comicslate.org" = {
         documentRoot = "/var/www/comicslate.org";
@@ -327,6 +395,13 @@
             AuthUserFile ${config.sops.secrets.webdav-password.path}
             Require valid-user
           </Directory>
+        '';
+      };
+      "app.comicslate.org" = {
+        extraConfig = ''
+          AddOutputFilterByType DEFLATE application/json text/plain
+          ProxyPreserveHost On
+          ProxyPass "/" "http://localhost:8081/"
         '';
       };
       "osp.dget.cc" = {
