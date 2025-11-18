@@ -205,6 +205,7 @@
           # i.e.
           # $ cloudflared tunnel route dns comicslate web2.comicslate.org
           "comicslate.org" = "http://localhost:80";
+          "admin.comicslate.org" = "http://localhost:80";
           "test.comicslate.org" = "http://localhost:80";
           "osp.dget.cc" = "http://localhost:80";
 
@@ -256,6 +257,12 @@
     ];
   };
 
+  sops.secrets.webdav-password = {
+    sopsFile = secrets/webdav-password.bin;
+    format = "binary";
+    owner = "wwwrun";
+  };
+
   services.httpd = {
     enable = true;
     enablePHP = true;
@@ -287,6 +294,21 @@
           <Directory /var/www/test.comicslate.org>
             Options FollowSymLinks MultiViews
             AllowOverride All
+          </Directory>
+        '';
+      };
+      "admin.comicslate.org" = {
+        documentRoot = "/var/www/comicslate.org";
+        extraConfig = ''
+          <Directory /var/www/comicslate.org>
+            Dav On
+            AllowOverride None
+            DirectoryIndex disabled
+
+            AuthType Basic
+            AuthName "Hoppla"
+            AuthUserFile ${config.sops.secrets.webdav-password.path}
+            Require valid-user
           </Directory>
         '';
       };
