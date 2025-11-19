@@ -388,6 +388,10 @@
 
   services.journald.storage = "volatile";
 
+  systemd.tmpfiles.rules = [
+    "d /run/httpd 0700 wwwrun wwwrun -"
+  ];
+
   services.httpd = {
     enable = true;
     logFormat = "none"; # we configure our own below
@@ -410,11 +414,16 @@
       "deflate"
       # cloudflared tunnel de-ip
       "remoteip"
+      # WebDav access
+      "dav"
+      "dav_fs"
     ];
     extraConfig = ''
       # cloudflared tunnel de-ip
       RemoteIPHeader CF-Connecting-IP
       RemoteIPInternalProxy 127.0.0.1 ::1
+
+      DAVLockDB /run/httpd/davlockdb
     '';
     virtualHosts =
       let
@@ -493,10 +502,10 @@
         };
         "admin.comicslate.org" = {
           listen = local;
-          documentRoot = "/var/www/comicslate.org";
+          documentRoot = "/var/www";
           extraConfig = ''
             ${log "admin.comicslate.org"}
-            <Directory /var/www/comicslate.org>
+            <Directory /var/www>
               Dav On
               AllowOverride None
               DirectoryIndex disabled
