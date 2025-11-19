@@ -17,9 +17,6 @@
 
   networking.hostName = "smith";
   networking.domain = "comicslate.org";
-  networking.hosts = {
-    "2a01:4f8:c010:d56::6" = [ "ghcr.io" ]; # https://danwin1210.de/github-ipv6-proxy.php
-  };
 
   networking.firewall.enable = true;
   networking.nftables.enable = true;
