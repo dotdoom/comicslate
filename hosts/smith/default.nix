@@ -520,7 +520,33 @@
           extraConfig = log "osp.dget.cc";
         };
       };
+  };
+
+  systemd.services.archives = {
+    description = "Backup and rotation of comicslate archives";
+    startAt = "daily";
+    path = [ pkgs.p7zip ];
+    serviceConfig = {
+      User = "wwwrun";
+      Type = "oneshot";
     };
+
+    script = ''
+      set -eu
+
+      ARCHIVES_ROOT="/var/www/.htsecure/archives"
+      TIMESTAMP=$(date '+%Y-%m-%d_%H-%M-%S')
+
+      mkdir -p "$ARCHIVES_ROOT"
+
+      7zr a "$ARCHIVES_ROOT/pages_$TIMESTAMP.7z" \
+          /var/www/comicslate.org/data/pages
+
+      7zr a "$ARCHIVES_ROOT/meta_$TIMESTAMP.7z" \
+          /var/www/comicslate.org/data/meta
+
+      find "$ARCHIVES_ROOT" -type f -name '*.7z' -mtime +30 -delete
+    '';
   };
 
   # Doesn't matter with impermanence, and better to know that on
