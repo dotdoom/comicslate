@@ -368,6 +368,24 @@
     owner = "wwwrun";
   };
 
+  services.logrotate.settings = {
+    "/var/www/.htsecure/log/*.log" = {
+      daily = true;
+      minsize = "5M";
+      missingok = true;
+      rotate = 9;
+      compress = true;
+      delaycompress = true;
+      notifempty = true;
+      nocreate = true;
+      sharedscripts = true;
+
+      postrotate = ''
+        ${pkgs.systemd}/bin/systemctl reload httpd.service
+      '';
+    };
+  };
+
   services.httpd = {
     enable = true;
     enablePHP = true;
