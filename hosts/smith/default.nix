@@ -386,8 +386,11 @@
     };
   };
 
+  services.journald.storage = "volatile";
+
   services.httpd = {
     enable = true;
+    logFormat = "none"; # we configure our own below
     enablePHP = true;
     phpPackage = phps.php74;
     phpOptions = ''
@@ -546,6 +549,58 @@
           /var/www/comicslate.org/data/meta
 
       find "$ARCHIVES_ROOT" -type f -name '*.7z' -mtime +30 -delete
+    '';
+  };
+
+  systemd.services.cleanup = {
+    description = "Cleanup unused and stale files";
+    startAt = "daily";
+    path = [
+      pkgs.findutils
+      pkgs.gawk
+      pkgs.coreutils-full
+    ];
+
+    serviceConfig = {
+      User = "wwwrun";
+      Type = "oneshot";
+    };
+
+    script = ''
+      set -eu
+
+      echo "Removing old rendered versions..."
+      find /var/www/comicslate.org/data/media/u \
+        -type f \
+        -name "*@*.webp" \
+        -print0 | \
+      gawk -v RS='\0' '
+        match($0, /^(.*)@([0-9]+)[.]webp$/, parts) {
+          prefix = parts[1]         # The prefix, e.g., /var/www/data/u/sci-fi/freefall/1234
+          timestamp = parts[2] + 0  # The timestamp, converted to a number
+
+          if (prefix in newest_ts) {
+            if (timestamp > newest_ts[prefix]) {
+              printf "%s\0", newest_file[prefix]
+              newest_ts[prefix] = timestamp
+              newest_file[prefix] = $0
+            } else {
+              printf "%s\0", $0
+            }
+          } else {
+            newest_ts[prefix] = timestamp
+            newest_file[prefix] = $0
+          }
+        }' | xargs -0 rm -v
+
+        echo "Removing stale cache files..."
+        find /var/www/comicslate.org/data/cache \
+          -type f \
+          -mtime +90 \
+          -print \
+          -delete
+
+        df -h /var/www
     '';
   };
 
