@@ -405,50 +405,120 @@
       # For "AddOutputFilterByType DEFLATE":
       "filter"
       "deflate"
+      # cloudflared tunnel de-ip
+      "remoteip"
     ];
-    virtualHosts = {
-      "comicslate.org" = {
-        documentRoot = "/var/www/comicslate.org";
-        extraConfig = ''
-          <Directory /var/www/comicslate.org>
-            Options FollowSymLinks MultiViews
-            AllowOverride All
-          </Directory>
-        '';
-      };
-      "test.comicslate.org" = {
-        documentRoot = "/var/www/test.comicslate.org";
-        extraConfig = ''
-          <Directory /var/www/test.comicslate.org>
-            Options FollowSymLinks MultiViews
-            AllowOverride All
-          </Directory>
-        '';
-      };
-      "admin.comicslate.org" = {
-        documentRoot = "/var/www/comicslate.org";
-        extraConfig = ''
-          <Directory /var/www/comicslate.org>
-            Dav On
-            AllowOverride None
-            DirectoryIndex disabled
+    extraConfig = ''
+      # cloudflared tunnel de-ip
+      RemoteIPHeader CF-Connecting-IP
+      RemoteIPInternalProxy 127.0.0.1 ::1
+    '';
+    virtualHosts =
+      let
+        log = host: ''
+          ErrorLog /var/www/.htsecure/log/${host}.error.log
+          # Stop logging "AH01630: client denied by server configuration".
+          LogLevel warn authz_core:crit
+          # Add "rewrite:trace3" to the line above for RewriteEngine debug.
+          CustomLog /var/www/.htsecure/log/${host}.access.log combined
 
-            AuthType Basic
-            AuthName "Hoppla"
-            AuthUserFile ${config.sops.secrets.webdav-password.path}
-            Require valid-user
-          </Directory>
+          CustomLog /var/www/.htsecure/log/${host}.full.log \
+            "[%{%F %T}t.%{usec_frac}t %{%z}t]\n\
+            Client: %a (%{CF-IPCountry}i)\n\
+            Request: %{X-Forwarded-Proto}i://%{Host}i %r\n\
+            User-Agent: %{User-Agent}i\n\
+            Referer: %{Referer}i\n\
+            Server: [%A:%{local}p] %v: %R:%f\n\
+            Response: HTTP %s %301,302{Location}o, %B bytes of %{Content-Type}o (%{Content-Encoding}o) in %D usec"
         '';
-      };
-      "app.comicslate.org" = {
-        extraConfig = ''
-          AddOutputFilterByType DEFLATE application/json text/plain
-          ProxyPreserveHost On
-          ProxyPass "/" "http://localhost:8081/"
+
+        safety = ''
+          # https://googlechrome.github.io/samples/csp-upgrade-insecure-requests/
+          # If there are insecure (http://) links on the page, they will automatically
+          # be replaced with https, without showing the "mixed content" warning.
+          #2016-04-06: DISABLED: there are unfortunately http-only links on the pages.
+          #Header set "Content-Security-Policy" "upgrade-insecure-requests"
+
+          Header set "X-Frame-Options" "SAMEORIGIN"
         '';
-      };
-      "osp.dget.cc" = {
-        documentRoot = "/var/www/osp.dget.cc";
+
+        local = [
+          {
+            ip = "127.0.0.1";
+            port = 80;
+          }
+          {
+            ip = "::1";
+            port = 80;
+          }
+        ];
+      in
+      {
+        "comicslate.org" = {
+          listen = local;
+          documentRoot = "/var/www/comicslate.org";
+          serverAliases = [
+            # localhost doesn't have HTTPS certificate, but Chrome is precompiled
+            # with hardcoded list of HSTS which includes comicslate.org, forcing
+            # the browser to try HTTPS regardless of options and flags.
+            #
+            # We use a fake hostname in our renderer to avoid hitting HSTS list.
+            "render"
+          ];
+          extraConfig = ''
+            ${log "comicslate.org"}
+            ${safety}
+
+            <Directory /var/www/comicslate.org>
+              Options FollowSymLinks MultiViews
+              AllowOverride All
+            </Directory>
+          '';
+        };
+        "test.comicslate.org" = {
+          listen = local;
+          documentRoot = "/var/www/test.comicslate.org";
+          extraConfig = ''
+            ${log "test.comicslate.org"}
+            ${safety}
+
+            <Directory /var/www/test.comicslate.org>
+              Options FollowSymLinks MultiViews
+              AllowOverride All
+            </Directory>
+          '';
+        };
+        "admin.comicslate.org" = {
+          listen = local;
+          documentRoot = "/var/www/comicslate.org";
+          extraConfig = ''
+            ${log "admin.comicslate.org"}
+            <Directory /var/www/comicslate.org>
+              Dav On
+              AllowOverride None
+              DirectoryIndex disabled
+
+              AuthType Basic
+              AuthName "Hoppla"
+              AuthUserFile ${config.sops.secrets.webdav-password.path}
+              Require valid-user
+            </Directory>
+          '';
+        };
+        "app.comicslate.org" = {
+          listen = local;
+          extraConfig = ''
+            ${log "app.comicslate.org"}
+            AddOutputFilterByType DEFLATE application/json text/plain
+            ProxyPreserveHost On
+            ProxyPass "/" "http://localhost:8081/"
+          '';
+        };
+        "osp.dget.cc" = {
+          listen = local;
+          documentRoot = "/var/www/osp.dget.cc";
+          extraConfig = log "osp.dget.cc";
+        };
       };
     };
   };
