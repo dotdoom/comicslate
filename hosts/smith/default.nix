@@ -514,6 +514,10 @@
               AuthName "Hoppla"
               AuthUserFile ${config.sops.secrets.webdav-password.path}
               Require valid-user
+
+              <FilesMatch "^\.ht">
+                Require valid-user
+              </FilesMatch>
             </Directory>
           '';
         };
