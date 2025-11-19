@@ -46,7 +46,9 @@
     ];
   };
 
-  users.users.root.openssh.authorizedKeys.keys = trusted-ssh-keys;
+  users.users.root.openssh.authorizedKeys.keys = trusted-ssh-keys ++ [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPYCsprpT+Q8L4X4hXUjF3/0P1ACYvPuP+WQSjyllxeQ root@nas"
+  ];
   networking.hostId = "474ffba4";
 
   systemd.network.enable = true;
