@@ -334,6 +334,20 @@
       PasswordAuthentication yes
   '';
 
+  sops.secrets.nullmailer-remotes = {
+    sopsFile = secrets/nullmailer-remotes.bin;
+    format = "binary";
+    owner = "nullmailer";
+  };
+  services.nullmailer = {
+    enable = true;
+    config = {
+      adminaddr = "dot.doom@gmail.com";
+      defaulthost = "comicslate.org";
+    };
+    remotesFile = config.sops.secrets.nullmailer-remotes.path;
+  };
+
   sops.secrets.discord-bot = {
     sopsFile = secrets/discord-bot.env;
     format = "dotenv";
@@ -463,7 +477,7 @@
       ; Some processes can grow really large.
       memory_limit = 1G
       ; sendmail command line working with nullmailer
-      sendmail_path = /usr/sbin/sendmail -t -i
+      sendmail_path = ${config.security.wrapperDir}/sendmail -t -i
     '';
     extraModules = [
       # For "AddOutputFilterByType DEFLATE":
