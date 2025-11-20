@@ -354,6 +354,7 @@
   };
   virtualisation.podman.enable = true;
   virtualisation.oci-containers.containers = {
+    # TODO: https://github.com/VioletCranberry/discord-rss-bot
     monitorss = {
       image = "docker.io/synzen/monitorss:latest";
       volumes = [
