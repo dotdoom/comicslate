@@ -362,6 +362,59 @@
     ];
   };
 
+  /*
+    fonts = {
+      fontDir.enable = true;
+      packages = with pkgs; [
+        carlito # Chrome OS equivalent to Calibri
+        caladea # Chrome OS equivalent to Cambria
+        google-fonts
+      ];
+
+      fontconfig = {
+        enable = true;
+        localConf = ''
+          <!-- Enable subpixel rendering -->
+          <match target="font">
+            <edit mode="assign" name="rgba" ><const>rgb</const></edit>
+          </match>
+          <!-- Subpixel rendering doesn't work with hinting -->
+          <match target="font">
+            <edit mode="assign" name="hinting"><bool>false</bool></edit>
+          </match>
+
+          <match target="font">
+            <edit mode="assign" name="antialias"><bool>true</bool></edit>
+          </match>
+
+          <match target="font">
+            <edit mode="assign" name="lcdfilter"><const>lcddefault</const></edit>
+          </match>
+        '';
+
+        defaultFonts = {
+          sansSerif = [
+            "Arimo"
+            "Carlito"
+            "Liberation Sans"
+            "DejaVu Sans"
+          ];
+          serif = [
+            "Tinos"
+            "Caladea"
+            "Liberation Serif"
+            "DejaVu Serif"
+          ];
+          monospace = [
+            "Cousine"
+            "Liberation Mono"
+            "DejaVu Sans Mono"
+          ];
+        };
+      };
+    };
+  */
+
   sops.secrets.webdav-password = {
     sopsFile = secrets/webdav-password.bin;
     format = "binary";
