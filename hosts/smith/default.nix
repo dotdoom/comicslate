@@ -334,6 +334,10 @@
       PasswordAuthentication yes
   '';
 
+  sops.secrets.discord-bot = {
+    sopsFile = secrets/discord-bot.env;
+    format = "dotenv";
+  };
   virtualisation.podman.enable = true;
   virtualisation.oci-containers.containers = {
     monitorss = {
@@ -341,9 +345,9 @@
       volumes = [
         "/var/www/.htsecure/Discord.RSS:/data"
       ];
+      environmentFiles = [ config.sops.secrets.discord-bot.path ];
       environment = {
         DRSS_DATABASE_URI = "/data";
-        DRSS_BOT_TOKEN = "sikret";
       };
     };
   };
