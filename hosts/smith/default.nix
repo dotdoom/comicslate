@@ -465,7 +465,11 @@
 
   services.httpd = {
     enable = true;
-    logFormat = "none"; # we configure our own below
+
+    # we configure our own logging below
+    logFormat = "none";
+    logPerVirtualHost = false;
+
     enablePHP = true;
     phpPackage = phps.php74;
     phpOptions = ''
