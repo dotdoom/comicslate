@@ -460,6 +460,33 @@
 
   services.journald.storage = "volatile";
 
+  system.autoUpgrade = {
+    # systemctl start nixos-upgrade
+    enable = true;
+    flake = "github:dotdoom/comicslate#${config.networking.hostName}";
+
+    dates = "06:30";
+    allowReboot = true; # Reboot often! Keeps things clean due to impermanence.
+    rebootWindow = {
+      lower = "06:25";
+      upper = "07:30"; # Do not reboot if an upgrade took longer than this.
+    };
+  };
+
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 60d";
+  };
+
+  nix.settings = {
+    extra-experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+    auto-optimise-store = true;
+  };
+
   systemd.tmpfiles.rules = [
     "d /run/httpd 0700 wwwrun wwwrun -"
   ];
