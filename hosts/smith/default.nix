@@ -288,6 +288,7 @@
     tunnels = {
       "comicslate" = {
         credentialsFile = config.sops.secrets.cloudflare-tunnel-comicslate.path;
+        edgeIPVersion = "6";
         ingress = {
           # Remember to create a proxied CNAME to "<tunnelid>.cfargotunnel.com",
           # e.g. automatically using
@@ -315,9 +316,6 @@
       };
     };
   };
-
-  # TODO: https://github.com/NixOS/nixpkgs/pull/448934
-  systemd.services.cloudflared-tunnel-comicslate.environment.TUNNEL_EDGE_IP_VERSION = "6";
 
   services.openssh.settings.Macs = lib.mkAfter [
     # Current defaults:
