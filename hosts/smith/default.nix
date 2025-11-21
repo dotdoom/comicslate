@@ -466,6 +466,7 @@
 
   services.httpd = {
     enable = true;
+    maxClients = 4; # maximum number of workers
 
     # we configure our own logging below
     logFormat = "none";
