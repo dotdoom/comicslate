@@ -33,6 +33,11 @@
     neededForUsers = true;
   };
   users.users.root.hashedPasswordFile = config.sops.secrets.root-password.path;
+  # Impermanence kicks off AFTER users are created; we need to access the host
+  # key before that, to provision neededForUsers=true secrets such as the root
+  # password.
+  # https://github.com/nix-community/impermanence/issues/282
+  sops.age.sshKeyPaths = [ "${persistenceCommon}/etc/ssh/ssh_host_ed25519_key" ];
 
   services.openssh = {
     enable = true;
