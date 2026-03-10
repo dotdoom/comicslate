@@ -39,7 +39,7 @@
           persistenceCommon = "/persistent";
           trusted-ssh-keys = [
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBxRBsFGa8OFbviYDGSAKLgfm/K2XUxvCo+31FW37yab artem"
-            "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBCW0Pq7WVNeIRJDgPi0ux3ajwhs/QEy5Ya8GG+STYMjApnfqkfG4OKh59BJHlsb354L5MpiV1YPIbW7ryw+ibuA= artem@corp-titan-nano-macbook"
+            "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBJg7zQ4H0LQeQcILZBwCzQ+MYKtCgKm7HPe9oFeoyprKZXAvpm+HDHtaYdU39JF9f+nvRztzXuMhgETAQMAQCkc= fingerprint@macbook"
           ];
           phps = inputs.phps.packages.x86_64-linux;
         };
