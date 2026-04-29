@@ -2,8 +2,13 @@
 
 x-client-keys:
   # age-plugin-yubikey -i | grep Recipient
-  artem-yubikey-keychain: &artem-yubikey-keychain "age1yubikey1qff6puqp64kv6kzz8gql992nfxp5d3fmtapacafxqhw4vqwe6agkyqxg35m"
+  artem-yubikey-keychain: &artem-yubikey-keychain "age1yubikey1qw0lxldkyr0wyazf6yu05y7tfndl5yp4stz75ml5xk9ynymaezhqg09g4gw"
   artem-yubikey-safe: &artem-yubikey-safe "age1yubikey1qvtm0m3wy6yfcl0ndjhl7cdfnnqkhkple0twc6udr0fp0qy3c6thvy3w7vf"
+  artem-yubikey-usba: &artem-yubikey-usba "age1yubikey1qtadjr2z5yer9qnr4eddy53txsssx53ph2je4aackrnlg3ra7dq3xfc2gt8"
+
+  # Public key can not be retrieved; if you lose it, generate a new pair and rekey:
+  # age-plugin-se keygen --access-control=any-biometry -o key.txt
+  artem-macbook: &artem-macbook "age1se1qfu6nlq2g2yzw0u9e8um7nuxyqsvyu4zgna06n37w5xh3fypd5g42w2nuxs"
 
 x-server-keys:
   # ssh-keyscan smith.comicslate.org | ssh-to-age
@@ -15,4 +20,6 @@ creation_rules:
       - age:
           - *artem-yubikey-keychain
           - *artem-yubikey-safe
+          - *artem-yubikey-usba
+          - *artem-macbook
           - *smith

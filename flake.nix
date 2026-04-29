@@ -67,6 +67,7 @@
             sops # sops hosts/common/secrets/root-password.bin
             ssh-to-age
             age-plugin-yubikey
+            age-plugin-se
           ];
         };
       }
