@@ -233,7 +233,7 @@
     wantedBy = [ "multi-user.target" ];
 
     path = with pkgs; [
-      nodejs_20
+      nodejs_22
       git
       bash
       coreutils
