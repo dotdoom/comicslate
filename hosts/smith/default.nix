@@ -100,7 +100,7 @@
   disko.devices = {
     disk = {
       root = {
-        device = "/dev/sda";
+        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_106759408";
         type = "disk";
         content = {
           # x86 Hetzner VMs only support legacy (non-EFI) boot.
