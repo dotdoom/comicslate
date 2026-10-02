@@ -3,8 +3,14 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    systems.url = "github:nix-systems/default";
+    fw_nix = {
+      url = "git+https://github.com/futureware-tech/nix.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.systems.follows = "systems";
+      inputs.git-hooks.follows = "git-hooks";
+    };
     phps.url = "github:fossar/nix-phps";
-    flake-utils.url = "github:numtide/flake-utils";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     sops-nix = {
       url = "github:Mic92/sops-nix";
@@ -27,24 +33,38 @@
     {
       self,
       nixpkgs,
-      flake-utils,
+      systems,
       ...
     }@inputs:
+    let
+      eachSystem = nixpkgs.lib.genAttrs (import systems);
+    in
     {
+      checks = eachSystem (system: {
+        pre-commit-check = inputs.git-hooks.lib.${system}.run (
+          {
+            src = ./.;
+          }
+          // inputs.fw_nix.lib.pre-commit
+        );
+      });
+
       # nixos-rebuild build-vm --flake .#smith
       # QEMU_KERNEL_PARAMS=console=ttyS0 result/bin/run-nixos-vm -nographic; reset
       nixosConfigurations.smith = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {
           persistenceCommon = "/persistent";
-          trusted-ssh-keys = [
-            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBxRBsFGa8OFbviYDGSAKLgfm/K2XUxvCo+31FW37yab artem"
-            "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBJg7zQ4H0LQeQcILZBwCzQ+MYKtCgKm7HPe9oFeoyprKZXAvpm+HDHtaYdU39JF9f+nvRztzXuMhgETAQMAQCkc= fingerprint@macbook"
-          ];
           phps = inputs.phps.packages.x86_64-linux;
         };
 
         modules = [
+          inputs.fw_nix.nixosModules.identities
+          inputs.fw_nix.nixosModules.sshd
+          inputs.fw_nix.nixosModules.systemd
+          inputs.fw_nix.nixosModules.nix-settings
+          inputs.fw_nix.nixosModules.nix-gc
+          inputs.fw_nix.nixosModules.tools
           nixpkgs.nixosModules.notDetected
           inputs.disko.nixosModules.disko
 
@@ -55,21 +75,26 @@
           hosts/smith/default.nix
         ];
       };
-    }
-    // flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = import nixpkgs { inherit system; };
-      in
-      {
-        devShells.default = pkgs.mkShell {
-          packages = with pkgs; [
-            sops # sops hosts/common/secrets/root-password.bin
-            ssh-to-age
-            age-plugin-yubikey
-            age-plugin-se
-          ];
-        };
-      }
-    );
+
+      devShells = eachSystem (
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+          inherit (self.checks.${system}.pre-commit-check) shellHook enabledPackages;
+        in
+        {
+          default = pkgs.mkShell {
+            packages =
+              enabledPackages
+              ++ (with pkgs; [
+                sops # sops hosts/common/secrets/root-password.bin
+                ssh-to-age
+                age-plugin-yubikey
+                age-plugin-se
+              ]);
+            inherit shellHook;
+          };
+        }
+      );
+    };
 }

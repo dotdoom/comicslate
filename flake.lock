@@ -52,22 +52,30 @@
         "type": "github"
       }
     },
-    "flake-utils": {
+    "fw_nix": {
       "inputs": {
-        "systems": "systems"
+        "git-hooks": [
+          "git-hooks"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "systems": [
+          "systems"
+        ]
       },
       "locked": {
-        "lastModified": 1731533236,
-        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
-        "type": "github"
+        "lastModified": 1790698990,
+        "narHash": "sha256-3O+rVesesqOhcqbRbBsCKN5Nf+mrQCsF6pIsm7MYORs=",
+        "ref": "refs/heads/main",
+        "rev": "23b03a94448be4392b747436b9dc675204dd9f13",
+        "revCount": 56,
+        "type": "git",
+        "url": "https://github.com/futureware-tech/nix.git"
       },
       "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
+        "type": "git",
+        "url": "https://github.com/futureware-tech/nix.git"
       }
     },
     "git-hooks": {
@@ -181,11 +189,11 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1790822859,
-        "narHash": "sha256-69xHQhAeMAD2wDXO7T2pcOZIF9Sga2W+JkmY2a11Ops=",
+        "lastModified": 1790553024,
+        "narHash": "sha256-CDsV5NBbKeL37GoM2VPcPKQ4GUEdSf58CUex1d8B+/A=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "c59305bab2065cfecc4944690d9eedbb56f3a9fa",
+        "rev": "88c4c23f3d6e5a4116ee19e148df5a0f2004f861",
         "type": "github"
       },
       "original": {
@@ -233,13 +241,14 @@
     "root": {
       "inputs": {
         "disko": "disko",
-        "flake-utils": "flake-utils",
+        "fw_nix": "fw_nix",
         "git-hooks": "git-hooks",
         "impermanence": "impermanence",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_3",
         "phps": "phps",
-        "sops-nix": "sops-nix"
+        "sops-nix": "sops-nix",
+        "systems": "systems"
       }
     },
     "sops-nix": {
