@@ -65,6 +65,7 @@
           inputs.fw_nix.nixosModules.nix-settings
           inputs.fw_nix.nixosModules.nix-gc
           inputs.fw_nix.nixosModules.tools
+          inputs.fw_nix.nixosModules.telegraf
           nixpkgs.nixosModules.notDetected
           inputs.disko.nixosModules.disko
 

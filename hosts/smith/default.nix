@@ -19,6 +19,7 @@
   networking.domain = "comicslate.org";
 
   networking.firewall.enable = true;
+  networking.firewall.allowedTCPPorts = [ 9273 ]; # telegraf (Prometheus client)
   networking.nftables.enable = true;
 
   services.qemuGuest.enable = true;
