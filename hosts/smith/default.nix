@@ -459,10 +459,6 @@
       memory_limit = 1G
       ; sendmail command line working with nullmailer
       sendmail_path = ${config.security.wrapperDir}/sendmail -t -i
-      ; Interim mitigation for CVE-2026-109618/CVE-2026-109619 (PHP core RCE,
-      ; the exploit path goes through the upload progress feature). Not a fix:
-      ; replace with a patched PHP as soon as one is available.
-      session.upload_progress.enabled = Off
     '';
     extraModules = [
       # For "AddOutputFilterByType DEFLATE":
