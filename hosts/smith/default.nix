@@ -449,17 +449,17 @@
 
     enablePHP = true;
     phpPackage = phps.php74;
-    phpOptions = ''
-      ; Doku relies on filesystem lookup a lot, this cache is handy.
-      realpath_cache_size = 40M
-      ; There's also a limit in CloudFlare, up to 100MB on free plan.
-      upload_max_filesize = 15M
-      post_max_size = 15M
-      ; Some processes can grow really large.
-      memory_limit = 1G
-      ; sendmail command line working with nullmailer
-      sendmail_path = ${config.security.wrapperDir}/sendmail -t -i
-    '';
+    phpOptions = {
+      # Doku relies on filesystem lookup a lot, this cache is handy.
+      realpath_cache_size = "40M";
+      # There's also a limit in CloudFlare, up to 100MB on free plan.
+      upload_max_filesize = "15M";
+      post_max_size = "15M";
+      # Some processes can grow really large.
+      memory_limit = "1G";
+      # sendmail command line working with nullmailer
+      sendmail_path = "${config.security.wrapperDir}/sendmail -t -i";
+    };
     extraModules = [
       # For "AddOutputFilterByType DEFLATE":
       "filter"
